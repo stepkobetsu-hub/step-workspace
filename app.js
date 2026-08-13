@@ -2,7 +2,7 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-2';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
