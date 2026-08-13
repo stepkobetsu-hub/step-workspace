@@ -10,6 +10,7 @@
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV1';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]}};
   const byId=id=>document.getElementById(id);
@@ -49,26 +50,46 @@
     localStorage.setItem(STAFF_CODE_KEY,code);localStorage.setItem(STAFF_PASSWORD_KEY,password);saveAuth(result,code);
     return loadRegistry();
   }
-  async function loadRegistry(){
-    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_EXPORT,{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG,{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null)]);
-    if(!result.success)throw new Error(result.error||'アプリ一覧を取得できませんでした。');
-    const registered=Array.isArray(registryExport?.apps)?registryExport.apps:[];const systems=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;const source=Core.mergeCatalogSources(systems,catalogExport?.apps);
+  function showRegistrySource(source){
+    if(!Array.isArray(source)||!source.length)return false;
     state.auth=readAuth();state.baseApps=Core.buildApps(source);state.config=Core.normalizeWorkspaceConfig(readJson(WORKSPACE_CONFIG_KEY,Core.defaultWorkspaceConfig()));rebuildApps();
-    if(!state.apps.length)throw new Error('利用できるアプリが登録されていません。');
+    if(!state.apps.length)return false;
     state.favorites=readJson(FAVORITES_KEY,null);
     if(!Array.isArray(state.favorites)){state.favorites=Core.defaultFavoriteIds(state.apps);writeJson(FAVORITES_KEY,state.favorites)}
     state.favorites=state.favorites.filter(id=>state.allApps.some(app=>app.id===id));
     state.recent=(readJson(RECENT_KEY,[])||[]).filter(entry=>state.allApps.some(app=>app.id===entry.id)).slice(0,5);
-    renderAll();setScreen('home');
+    renderAll();setScreen('home');return true;
+  }
+  function loadRegistryCache(){const cached=readJson(REGISTRY_CACHE_KEY,null);return showRegistrySource(cached?.source)}
+  function saveRegistryCache(source){writeJson(REGISTRY_CACHE_KEY,{source,savedAt:new Date().toISOString()})}
+  async function loadBundledCatalog(){
+    const catalog=await fetch(APP_CATALOG).then(response=>response.ok?response.json():null);
+    const source=Array.isArray(catalog?.apps)?catalog.apps:[];
+    if(!showRegistrySource(source))return false;
+    saveRegistryCache(source);return true;
+  }
+  async function loadRegistry(){
+    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_EXPORT).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG).then(response=>response.ok?response.json():null).catch(()=>null)]);
+    if(!result.success)throw new Error(result.error||'アプリ一覧を取得できませんでした。');
+    const registered=Array.isArray(registryExport?.apps)?registryExport.apps:[];const systems=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;const source=Core.mergeCatalogSources(systems,catalogExport?.apps);
+    if(!showRegistrySource(source))throw new Error('利用できるアプリが登録されていません。');saveRegistryCache(source);
+  }
+  async function refreshInBackground(){
+    try{await loadRegistry()}catch(_){
+      const code=localStorage.getItem(STAFF_CODE_KEY)||'';const password=localStorage.getItem(STAFF_PASSWORD_KEY)||'';
+      if(code&&password){try{await loginWith(code,password)}catch(_){}}
+    }
   }
   async function init(){
     setScreen('checking');
     const auth=readAuth();
     if(auth&&ALLOWED_PERMISSIONS.includes(String(auth.permissionLevel))){
+      if(loadRegistryCache()){refreshInBackground();return}
+      try{if(await loadBundledCatalog()){refreshInBackground();return}}catch(_){}
       try{await loadRegistry();return}catch(_){}
     }
     const code=localStorage.getItem(STAFF_CODE_KEY)||'';const password=localStorage.getItem(STAFF_PASSWORD_KEY)||'';
-    if(code&&password){try{await loginWith(code,password);return}catch(error){showLogin(error.message);return}}
+    if(code&&password){try{await loginWith(code,password);return}catch(error){if(loadRegistryCache()){refreshInBackground();return}showLogin(error.message);return}}
     showLogin();
   }
   function renderAll(){

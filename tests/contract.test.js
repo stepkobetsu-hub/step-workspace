@@ -15,6 +15,8 @@ test('left list mirrors global search and accepts explicit app card drops',()=>{
 test('category drag uses a dedicated handle so the full item remains a card drop target',()=>{assert.match(app,/category-drag-handle/);assert.match(app,/handle\.addEventListener\('dragstart'/);assert.doesNotMatch(app,/navItem\.draggable=state\.organizing/)});
 
 test('起動時は認証確認画面だけを表示する',()=>{assert.match(html,/body data-state="checking"/);assert.match(html,/id="loginScreen" hidden/);assert.match(html,/id="appShell" hidden/);assert.match(app,/setScreen\('checking'\)/)});
+test('保存済みアプリを即時表示し通信障害ではログイン画面へ戻さない',()=>{assert.match(app,/stepWorkspaceRegistryCacheV1/);assert.match(app,/if\(loadRegistryCache\(\)\)\{refreshInBackground\(\);return\}/);assert.match(app,/loadBundledCatalog/);assert.match(app,/catch\(_\)\{\}/);assert.match(html,/rel="preload" href="app-catalog\.json/);assert.doesNotMatch(html,/http-equiv="Cache-Control"/)});
+test('静的カタログ取得はブラウザキャッシュを利用する',()=>{assert.doesNotMatch(app,/cache:'no-store'/);assert.doesNotMatch(app,/cache:"no-store"/)});
 test('スタッフ共通認証と台帳・機能カタログを再利用する',()=>{assert.match(app,/api\('staffLogin'/);assert.match(app,/api\('getSystemRegistry'\)/);assert.match(app,/workspace-apps\.json/);assert.match(app,/app-catalog\.json/);assert.match(app,/mergeRegistrySources/);assert.match(app,/mergeCatalogSources/);assert.match(app,/stepStaffAppAuth/);assert.match(app,/\['2','3','4'\]/)});
 test('アプリカードは通常のリンクを使う',()=>{assert.match(html,/<a class="app-link">/);assert.match(app,/link\.href=app\.url/);assert.doesNotMatch(app,/window\.location/)});
 test('Googleスプレッドシートのカードは専用SVGアイコンを表示する',()=>{assert.match(app,/sheet-app-icon/);assert.match(app,/Google スプレッドシート/);assert.match(app,/sheet-grid/)});
