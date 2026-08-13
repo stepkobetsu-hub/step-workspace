@@ -12,7 +12,7 @@
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
   const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV1';
   const ALLOWED_PERMISSIONS=['2','3','4'];
-  const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]}};
+  const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
   const byId=id=>document.getElementById(id);
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
   const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}};
@@ -58,7 +58,7 @@
     if(!Array.isArray(state.favorites)){state.favorites=Core.defaultFavoriteIds(state.apps);writeJson(FAVORITES_KEY,state.favorites)}
     state.favorites=state.favorites.filter(id=>state.allApps.some(app=>app.id===id));
     state.recent=(readJson(RECENT_KEY,[])||[]).filter(entry=>state.allApps.some(app=>app.id===entry.id)).slice(0,5);
-    renderAll();setScreen('home');return true;
+    renderAll();setScreen('home');requestSharedConfig();return true;
   }
   function loadRegistryCache(){const cached=readJson(REGISTRY_CACHE_KEY,null);return showRegistrySource(cached?.source)}
   function saveRegistryCache(source){writeJson(REGISTRY_CACHE_KEY,{source,savedAt:new Date().toISOString()})}
@@ -103,7 +103,29 @@
     const custom=Core.buildApps(state.config.customApps);const seen=new Set();state.allApps=[...custom,...state.baseApps].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
   }
-  function persistConfig(){state.config=Core.normalizeWorkspaceConfig(state.config);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();renderAll()}
+  function sharedPayload(){return {schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]}}
+  function setSyncStatus(message,status){const root=byId('syncStatus');if(!root)return;root.textContent=message;root.dataset.status=status||''}
+  function applySharedPayload(payload,version){
+    if(!payload?.workspaceConfig)return false;
+    state.sharedApplying=true;state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
+    if(Array.isArray(payload.favorites)){state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));writeJson(FAVORITES_KEY,state.favorites)}
+    state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
+  }
+  async function refreshSharedConfig(){
+    if(!readAuth()||state.sharedLoading)return;state.sharedLoading=true;
+    try{const result=await api('getWorkspaceConfig');if(!result.success)throw new Error(result.error||'共有設定を取得できませんでした。');if(result.sharedState){if(Number(result.version||0)>state.sharedVersion||!state.sharedReady)applySharedPayload(result.sharedState,result.version)}else setSyncStatus('この端末の設定はまだ共有されていません','local')}
+    catch(_){setSyncStatus(state.sharedReady?'共有設定を再確認できませんでした':'現在はこの端末の設定を表示しています','error')}
+    finally{state.sharedLoading=false}
+  }
+  function requestSharedConfig(){if(state.sharedReady||state.sharedLoading)return;queueMicrotask(refreshSharedConfig)}
+  async function saveSharedConfig(){
+    setSyncStatus('全パソコンへ保存中…','saving');
+    try{const result=await api('saveWorkspaceConfig',{sharedState:sharedPayload()});if(!result.success)throw new Error(result.error||'共有設定を保存できませんでした。');state.sharedReady=true;state.sharedVersion=Number(result.version||state.sharedVersion+1);setSyncStatus('全パソコンへ保存しました','ready');return true}
+    catch(error){setSyncStatus(error.message||'共有設定を保存できませんでした','error');return false}
+  }
+  function scheduleSharedSave(){if(!state.sharedReady||state.sharedApplying)return;clearTimeout(state.sharedSaveTimer);state.sharedSaveTimer=setTimeout(()=>{state.sharedSavePromise=state.sharedSavePromise.then(saveSharedConfig)},650)}
+  async function publishSharedConfig(){const button=byId('publishConfigButton');button.disabled=true;const saved=await saveSharedConfig();button.disabled=false;if(saved)button.textContent='この配置を全端末へ再反映'}
+  function persistConfig(){state.config=Core.normalizeWorkspaceConfig(state.config);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();renderAll();scheduleSharedSave()}
   function commitConfig(change){state.history.past.push(clone(state.config));state.history.past=state.history.past.slice(-40);state.history.future=[];change(state.config);persistConfig()}
   function undoConfig(){const previous=state.history.past.pop();if(!previous)return;state.history.future.push(clone(state.config));state.config=previous;persistConfig()}
   function redoConfig(){const next=state.history.future.pop();if(!next)return;state.history.past.push(clone(state.config));state.config=next;persistConfig()}
@@ -211,7 +233,7 @@
   function restoreApp(id){commitConfig(config=>{config.archived=config.archived.filter(value=>value!==id)});renderArchiveList()}
   function permanentlyDeleteApp(id){const app=state.allApps.find(value=>value.id===id);if(!app||!confirm(`${app.name}を完全に削除しますか？この操作は戻せません。`))return;state.config.archived=state.config.archived.filter(value=>value!==id);state.config.customApps=state.config.customApps.filter(value=>value.id!==id);if(!state.config.deleted.includes(id))state.config.deleted.push(id);delete state.config.assignments[id];delete state.config.devices[id];delete state.config.cardOverrides[id];for(const categoryId of Object.keys(state.config.orders))state.config.orders[categoryId]=state.config.orders[categoryId].filter(value=>value!==id);state.history={past:[],future:[]};persistConfig();renderArchiveList()}
   function toggleFavorite(id){
-    state.favorites=state.favorites.includes(id)?state.favorites.filter(value=>value!==id):[...state.favorites,id];writeJson(FAVORITES_KEY,state.favorites);renderAll();
+    state.favorites=state.favorites.includes(id)?state.favorites.filter(value=>value!==id):[...state.favorites,id];writeJson(FAVORITES_KEY,state.favorites);renderAll();scheduleSharedSave();
   }
   function recordRecent(id){
     state.recent=[{id,usedAt:new Date().toISOString()},...state.recent.filter(entry=>entry.id!==id)].slice(0,5);writeJson(RECENT_KEY,state.recent);
@@ -225,7 +247,7 @@
     try{await api('logoutSystemPortal')}catch(_){}
     localStorage.removeItem(AUTH_KEY);localStorage.removeItem(STAFF_CODE_KEY);localStorage.removeItem(STAFF_PASSWORD_KEY);state.auth=null;byId('loginCode').value='';byId('loginPassword').value='';button.disabled=false;showLogin('ログアウトしました。');
   }
-  byId('loginForm').addEventListener('submit',submitLogin);byId('logoutButton').addEventListener('click',logout);byId('searchInput').addEventListener('input',event=>syncSearch(event.target));byId('categorySearch').addEventListener('input',event=>syncSearch(event.target));byId('settingsButton').addEventListener('click',openSettings);byId('headerSettingsButton').addEventListener('click',()=>setManagementMode(true));byId('managementButton').addEventListener('click',()=>setManagementMode(!state.adminMode));byId('finishManagementButton').addEventListener('click',()=>setManagementMode(false));byId('mobileMenuButton').addEventListener('click',toggleMobileMenu);byId('sidebarBackdrop').addEventListener('click',closeMobileMenu);byId('organizeButton').addEventListener('click',toggleOrganizing);byId('undoButton').addEventListener('click',undoConfig);byId('redoButton').addEventListener('click',redoConfig);byId('addCardButton').addEventListener('click',openAddCard);byId('archiveButton').addEventListener('click',openArchive);byId('addCardForm').addEventListener('submit',addCard);byId('closeAddCardButton').addEventListener('click',()=>byId('addCardDialog').close());byId('cancelAddCardButton').addEventListener('click',()=>byId('addCardDialog').close());byId('addCategoryButton').addEventListener('click',addCategory);byId('newCategoryName').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();addCategory()}});byId('resetLayoutButton').addEventListener('click',resetLayout);
+  byId('loginForm').addEventListener('submit',submitLogin);byId('logoutButton').addEventListener('click',logout);byId('searchInput').addEventListener('input',event=>syncSearch(event.target));byId('categorySearch').addEventListener('input',event=>syncSearch(event.target));byId('settingsButton').addEventListener('click',openSettings);byId('headerSettingsButton').addEventListener('click',()=>setManagementMode(true));byId('managementButton').addEventListener('click',()=>setManagementMode(!state.adminMode));byId('finishManagementButton').addEventListener('click',()=>setManagementMode(false));byId('mobileMenuButton').addEventListener('click',toggleMobileMenu);byId('sidebarBackdrop').addEventListener('click',closeMobileMenu);byId('organizeButton').addEventListener('click',toggleOrganizing);byId('undoButton').addEventListener('click',undoConfig);byId('redoButton').addEventListener('click',redoConfig);byId('addCardButton').addEventListener('click',openAddCard);byId('archiveButton').addEventListener('click',openArchive);byId('publishConfigButton').addEventListener('click',publishSharedConfig);byId('addCardForm').addEventListener('submit',addCard);byId('closeAddCardButton').addEventListener('click',()=>byId('addCardDialog').close());byId('cancelAddCardButton').addEventListener('click',()=>byId('addCardDialog').close());byId('addCategoryButton').addEventListener('click',addCategory);byId('newCategoryName').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();addCategory()}});byId('resetLayoutButton').addEventListener('click',resetLayout);
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!byId('searchSection').hidden){clearSearch();byId('searchInput').blur();return}if(event.key==='/'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&document.activeElement!==byId('searchInput')){event.preventDefault();byId('searchInput').focus()}});
-  init();
+  setInterval(()=>{if(state.sharedReady)refreshSharedConfig()},60000);init();
 })();

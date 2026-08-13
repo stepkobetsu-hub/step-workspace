@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260813-2">
   <link rel="manifest" href="manifest.webmanifest?v=20260813-2">
   <link rel="preload" href="app-catalog.json?v=20260813-1" as="fetch">
-  <link rel="stylesheet" href="styles.css?v=20260813-24">
+  <link rel="stylesheet" href="styles.css?v=20260813-25">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -47,7 +47,7 @@
       <nav class="category-tabs" id="categoryTabs" aria-label="項目一覧"></nav><p class="category-nav-empty" id="categoryNavEmpty" hidden>該当する項目がありません</p>
       <div class="sidebar-management">
         <button class="management-toggle" id="managementButton" type="button"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.2 15a1.7 1.7 0 0 0-1.6-1H2v-4h.6a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.66 4.2l.06.06A1.7 1.7 0 0 0 8.6 4.6a1.7 1.7 0 0 0 1-1.6V2h4v1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19 9a1.7 1.7 0 0 0 1.6 1h1.4v4h-1.4a1.7 1.7 0 0 0-1.2 1Z"/></svg>管理・設定</button>
-        <div class="management-panel" id="managementPanel" hidden><button id="addCardButton" type="button">カード追加</button><button id="settingsButton" type="button">項目設定</button><button id="organizeButton" type="button">並べ替え</button><button id="archiveButton" type="button">アーカイブ</button><div class="history-actions"><button id="undoButton" type="button" disabled>戻る</button><button id="redoButton" type="button" disabled>進む</button></div><a href="https://stepkobetsu-hub.github.io/step-system-registry/">資産管理</a><button class="management-finish" id="finishManagementButton" type="button">完了</button></div>
+        <div class="management-panel" id="managementPanel" hidden><button id="addCardButton" type="button">カード追加</button><button id="settingsButton" type="button">項目設定</button><button id="organizeButton" type="button">並べ替え</button><button id="archiveButton" type="button">アーカイブ</button><div class="history-actions"><button id="undoButton" type="button" disabled>戻る</button><button id="redoButton" type="button" disabled>進む</button></div><button class="publish-config-button" id="publishConfigButton" type="button">この配置を全端末へ反映</button><p class="sync-status" id="syncStatus" data-status="local">共有状態を確認中…</p><a href="https://stepkobetsu-hub.github.io/step-system-registry/">資産管理</a><button class="management-finish" id="finishManagementButton" type="button">完了</button></div>
       </div>
     </aside>
     <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="メニューを閉じる"></button>
@@ -112,7 +112,7 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-25"></script>
-  <script src="app.js?v=20260813-25"></script>
+  <script src="core.js?v=20260813-26"></script>
+  <script src="app.js?v=20260813-26"></script>
 </body>
 </html>
