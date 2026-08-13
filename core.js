@@ -39,8 +39,10 @@
   function nameOf(item){return text(item['正式名称']||item['システム名']||item['名称']||item.name||'名称未設定')}
   function idOf(item){return text(item.ID||item.id)||normalize(nameOf(item)).replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff-]/g,'-')}
   function categoryId(item){
-    const value=nameOf(item)+' '+text(item['分類']);
-    if(/講師|先生|給与|出勤/.test(value))return 'teacher';
+    const name=nameOf(item);const value=name+' '+text(item['分類']);
+    if(/請求|会計|領収|学費|invoice/i.test(name))return 'billing';
+    if(/出退くん|QR作成|QR読取|不達|配信|問い合わせ|受付/.test(name))return 'contact';
+    if(/講師|先生|給与|出勤/.test(name))return 'teacher';
     if(/請求|会計|領収|学費|invoice/i.test(value))return 'billing';
     if(/配信|メッセージ|不達|出退|QR|受付|問い合わせ|連絡/.test(value))return 'contact';
     if(/生徒|塾生|成績|学習|授業|面談|過去問|エントリー/.test(value))return 'student';
