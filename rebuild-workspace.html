@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>STEP業務ホーム 7項目から再作成</title>
+  <link rel="icon" href="favicon.svg">
+  <style>
+    :root{font-family:system-ui,"Yu Gothic",sans-serif;color:#102a4c;background:#f4f7fb}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}main{width:min(720px,100%);padding:32px;border:1px solid #dfe7f1;border-radius:16px;background:#fff;box-shadow:0 18px 55px rgba(15,39,71,.12)}h1{margin:0 0 10px;font-size:27px}p{color:#5c6d82;line-height:1.7}.preview{margin:22px 0;padding:18px;border-radius:12px;background:#f4f7fb}.preview strong{display:block;margin-bottom:8px}.preview ol{margin:0;padding-left:28px;line-height:1.9}.preview li span{float:right;color:#65758a}.warning{color:#a34218;font-weight:700}button{width:100%;min-height:54px;border:0;border-radius:10px;background:#1769e0;color:#fff;font-size:17px;font-weight:700;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}.status{min-height:28px;margin:16px 0 0;font-weight:700}.status.ok{color:#177245}.status.error{color:#b4233a}small{display:block;margin-top:18px;color:#738196;line-height:1.6}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>貼り付け一覧から作り直す</h1>
+    <p>先ほど確認した7項目・39カードを新しい配置として作成します。残っている同名カードのURLと、確認できた正式URLは自動で引き継ぎます。</p>
+    <section class="preview"><strong>作成内容：7項目・39カード</strong><ol id="categoryList"></ol></section>
+    <p class="warning" id="missingSummary">リンクを確認しています…</p>
+    <button id="rebuildButton" type="button" disabled>この内容で作り直して全パソコンへ保存</button>
+    <p class="status" id="status" aria-live="polite"></p>
+    <small>URLが確認できないカードは、タイトルの先頭に「リンク切れ」を付けます。あとから通常の鉛筆ボタンでタイトルとURLを編集できます。</small>
+  </main>
+  <script>
+  (()=>{
+    'use strict';
+    const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
+    const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
+    const oldConfig=read('stepWorkspaceConfigV1',{});
+    const auth=read('stepStaffAppAuth',null);
+    const oldFavorites=read('stepWorkspaceFavoritesV1',[]);
+    const categories=[
+      {id:'student',label:'生徒・授業',icon:'user',color:'#DD8700',count:7},
+      {id:'custom-time',label:'時間割',icon:'clock',color:'#7C5C20',count:4},
+      {id:'contact',label:'連絡・受付',icon:'chat',color:'#276EE4',count:8},
+      {id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4',count:4},
+      {id:'billing',label:'請求・会計',icon:'wallet',color:'#1D9550',count:4},
+      {id:'teacher',label:'講師・給与',icon:'teacher',color:'#D54883',count:7},
+      {id:'custom-portal',label:'ポータル・ホーム',icon:'grid',color:'#276EE4',count:5}
+    ];
+    const known={
+      '5555':'https://stepkobetsu-hub.github.io/step-workspace/#category-student',
+      '成績管理':'https://stepkobetsu-hub.github.io/seiseki-kanri/admin.html',
+      '学習進捗管理':'https://stepkobetsu-hub.github.io/foresta-step-progress/',
+      '面談メモ':'https://stepkobetsu-hub.github.io/seiseki-kanri/meeting_memo.html',
+      '過去問保管DB':'https://stepkobetsu-hub.github.io/seiseki-kanri/past_exam_db.html',
+      '過去問アップロード':'https://stepkobetsu-hub.github.io/seiseki-kanri/past_exam_upload.html',
+      'ポイント設定':'https://stepkobetsu-hub.github.io/student-QR/points_manager.html',
+      'STEP配信システム':'https://stepkobetsu-hub.github.io/step-message-center/',
+      '不達メール管理':'https://stepkobetsu-hub.github.io/student-QR/delivery_failures.html?v=575679fd',
+      '出退くんQR作成・読取':'https://stepkobetsu-hub.github.io/student-QR/my_qr.html',
+      '生徒・講師QR／入退室管理':'https://stepkobetsu-hub.github.io/student-QR/student_qr_register.html',
+      'お問い合わせ管理':'https://stepkobetsu-hub.github.io/step-form/contact_form.html',
+      '時間割マスタ入力':'https://script.google.com/macros/s/AKfycbyB2DdfN6Xdz0mq0vDs37sqNxtbTz5Mh085zdDB5HvVFIfOK1JjfbVCC6oQZ9j0NCeA/exec',
+      '受付カード読取':'https://juku-card-system.onrender.com/',
+      'エントリーシート読取':'https://stepkobetsu-hub.github.io/seiseki-kanri/entry_import.html',
+      '請求管理システムV3.1（学費計算・請求データ作成）':'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIktpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec',
+      '請求書作成・送信・入金管理':'https://stepkobetsu-hub.github.io/invoice-pdf/',
+      '料金特別調整':'https://stepkobetsu-hub.github.io/seiseki-kanri/billing_adjustment.html',
+      'ゆうちょBIZ従業員マスタ':'https://script.google.com/macros/s/AKfycbwYzQ1tM1mWRLG6jOxBirAuSUCMb41bkDsn5vviGUjDPmFKjJNCl5jdz7NFa4L45J8yvQ/exec',
+      '講師用：授業コマ数報告':'https://stepkobetsu-hub.github.io/teacher-portal/?view=attendance',
+      '講師用 出退くんQR':'https://stepkobetsu-hub.github.io/teacher-portal/?view=qr',
+      '夏休み出勤可能日登録':'https://stepkobetsu-hub.github.io/teacher_schedule/teacher_app.html',
+      '給与明細':'https://stepkobetsu-hub.github.io/teacher-portal/salary.html',
+      'STEP塾生アプリ（step-hub）':'https://stepkobetsu-hub.github.io/step-hub/',
+      '講師ポータル':'https://stepkobetsu-hub.github.io/teacher-portal/',
+      'STEPシステム資産管理台帳':'https://stepkobetsu-hub.github.io/step-system-registry/',
+      'STEP業務ホーム':'https://stepkobetsu-hub.github.io/step-workspace/',
+      'スタッフ用アプリ':'https://stepkobetsu-hub.github.io/seiseki-kanri/'
+    };
+    const definitions=[
+      ['student','5555','dd','both'],['student','成績管理','成績・通知表・志望校・生徒情報の確認と管理','both'],['student','学習進捗管理','生徒の学習状況と進捗を確認','both'],['student','面談メモ','面談・電話・相談内容の登録と生徒別履歴の確認','both'],['student','過去問保管DB','過去問題の登録・検索・閲覧','both'],['student','過去問アップロード','過去問ファイルをアップロードして保管','both'],['student','ポイント設定','生徒ポイントの確認・付与・使用・履歴管理','both'],
+      ['custom-time','時間割','通常時間割','desktop'],['custom-time','2026夏休み時間割(神領）','夏休み講習の時間割','both'],['custom-time','夏休み講習時間割（個人用→全体時間割作成）','生徒ごとの個人時間割を作成し、ボタン一つで全体時間割へ自動集約する、休み講習の時間割作成システム','both'],['custom-time','夏休み講習時間割（個人用→全体時間割作成）','個人時間割をつくると全体時間割にまとめてくれる','both'],
+      ['contact','STEP配信システム','個別送信・添付・送信履歴・欠席確認','both'],['contact','不達メール管理','入退室メールの不達・送信停止・配信再開を管理','both'],['contact','出退くんQR作成・読取','入退室QRの作成と読み取り','mobile'],['contact','生徒・講師QR／入退室管理','管理者QR登録と生徒・講師のQR作成・確認','mobile'],['contact','お問い合わせ管理','お問い合わせ内容の確認と対応','both'],['contact','欠席・遅刻連絡','保護者・生徒からの遅刻・欠席・早退連絡を受け付け、Google Sheetへ保存し、管理者メール・LINE通知を行う','both'],['contact','LINE用お知らせページ','LINE用お知らせページ（HP）','both'],['contact','受付カード','受付カードのスプレッドシートです。','both'],
+      ['custom-management','時間割マスタ入力','生徒マスタの中の「時間割マスタ」を直接入力・更新：請求と直結するので正確に','both'],['custom-management','生徒マスタ','生徒情報の確認と管理','desktop'],['custom-management','受付カード読取','受付カードの写真を読み取り、必要な内容を取り込む','mobile'],['custom-management','エントリーシート読取','入塾書類・成績・通知表・志望校を読み取って登録','mobile'],
+      ['billing','請求管理システムV3.1（学費計算・請求データ作成）','学費計算と請求データの作成・確認','both'],['billing','請求書作成・送信・入金管理','請求書の作成・確認・メール送信・入金管理','both'],['billing','料金特別調整','イレギュラーな割引・加算を登録','both'],['billing','請求書202608_請求 NEW','重要だが、通常は直接開かない。請求管理アプリの裏側で使用する基幹Google Sheet','desktop'],
+      ['teacher','夏休み出勤管理','講師からの出勤連絡を集約し、時間割に講師を一括入力ができる','both'],['teacher','ゆうちょBIZ従業員マスタ','講師マスターからゆうちょBIZ登録用CSVを作成','both'],['teacher','講師用：授業コマ数報告','授業後の担当授業・コマ数・勤務場所を報告','both'],['teacher','講師用 出退くんQR','講師本人の入退室用QRコードを表示','mobile'],['teacher','夏休み出勤可能日登録','夏期講習の出勤可能日を登録','both'],['teacher','給与明細','講師本人の給与明細を表示','both'],['teacher','講師マスター／給与明細','講師情報と給与明細の管理','both'],
+      ['custom-portal','STEP塾生アプリ（step-hub）','塾生向け機能をまとめた共通入口','both'],['custom-portal','講師ポータル','講師向け情報と業務メニュー','both'],['custom-portal','STEPシステム資産管理台帳','STEPの管理機能をまとめた入口','both'],['custom-portal','STEP業務ホーム','「STEP業務ホーム」とは、このページのことです。','both'],['custom-portal','スタッフ用アプリ','業務アプリを開く','both']
+    ];
+    const oldApps=Array.isArray(oldConfig.customApps)?oldConfig.customApps:[];
+    const oldOverrides=oldConfig.cardOverrides&&typeof oldConfig.cardOverrides==='object'?oldConfig.cardOverrides:{};
+    const usedOld=new Set();
+    const validUrl=value=>{try{const url=new URL(value);return url.protocol==='https:'||url.protocol==='http:'}catch(_){return false}};
+    function recoveredUrl(name){
+      for(let i=0;i<oldApps.length;i+=1){const app=oldApps[i];if(usedOld.has(i)||String(app?.displayName||'').replace(/^リンク切れ/,'')!==name)continue;const url=oldOverrides[app.id]?.url||app.productionUrl;if(validUrl(url)){usedOld.add(i);return url}}
+      return known[name]||'';
+    }
+    const assignments={},orders=Object.fromEntries(categories.map(item=>[item.id,[]])),devices={},cardOverrides={},customApps=[];let missing=0;
+    definitions.forEach((definition,index)=>{
+      const [category,name,description,device]=definition;const id=`rebuilt-${String(index+1).padStart(2,'0')}`;const recovered=recoveredUrl(name);const url=recovered||`https://stepkobetsu-hub.github.io/step-workspace/#link-missing-${index+1}`;const displayName=recovered?name:`リンク切れ${name}`;
+      customApps.push({id,displayName,description,category,productionUrl:url,parentSystem:'再作成カード',keywords:[name,description],favorite:true,recent:true,status:'active'});assignments[id]=category;orders[category].push(id);devices[id]=device;cardOverrides[id]={name:displayName,description,url,googleSheet:/^https:\/\/docs\.google\.com\/spreadsheets\//.test(url)};if(!recovered)missing+=1;
+    });
+    const rebuilt={categories:categories.map(({count,...item})=>item),removedCategories:['admin'],assignments,orders,devices,cardOverrides,customApps,archived:[],deleted:[],replaceCatalog:true};
+    const favorites=(Array.isArray(oldFavorites)?oldFavorites:[]).filter(id=>customApps.some(app=>app.id===id));
+    const list=document.getElementById('categoryList');categories.forEach(item=>{const li=document.createElement('li');li.textContent=item.label;const count=document.createElement('span');count.textContent=`${item.count}件`;li.append(count);list.append(li)});
+    document.getElementById('missingSummary').textContent=`URL確認済み ${39-missing}件／リンク切れ表示 ${missing}件`;
+    const button=document.getElementById('rebuildButton');const status=document.getElementById('status');
+    if(!auth?.systemPortalSessionToken){status.textContent='このブラウザのログイン情報が見つかりません。STEP業務ホームへログインしたブラウザで開いてください。';status.className='status error';return}
+    button.disabled=false;
+    button.addEventListener('click',async()=>{
+      button.disabled=true;status.textContent='新しい7項目・39カードを保存中…';status.className='status';
+      try{
+        const response=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken,sharedState:{schemaVersion:1,workspaceConfig:rebuilt,favorites}}),redirect:'follow'});
+        const result=JSON.parse(await response.text());if(!response.ok||!result.success)throw new Error(result.error||'保存できませんでした。');
+        localStorage.setItem('stepWorkspaceConfigV1',JSON.stringify(rebuilt));localStorage.setItem('stepWorkspaceFavoritesV1',JSON.stringify(favorites));status.textContent=`7項目・39カードを作成し、全パソコンへ保存しました（版 ${result.version}）`;status.className='status ok';button.textContent='再作成完了';
+      }catch(error){status.textContent=error.message||'保存できませんでした。';status.className='status error';button.disabled=false}
+    });
+  })();
+  </script>
+</body>
+</html>

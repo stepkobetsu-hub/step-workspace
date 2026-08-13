@@ -103,7 +103,7 @@
     const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))});
     return [...catalog,...registry];
   }
-  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label,icon:category.icon,color:category.color})),removedCategories:[],assignments:{},orders:{},devices:{},cardOverrides:{},customApps:[],archived:[],deleted:[]}}
+  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label,icon:category.icon,color:category.color})),removedCategories:[],assignments:{},orders:{},devices:{},cardOverrides:{},customApps:[],archived:[],deleted:[],replaceCatalog:false}}
   function normalizeWorkspaceConfig(value){
     const source=value&&typeof value==='object'?value:{};const defaults=defaultWorkspaceConfig();const supplied=Array.isArray(source.categories)?source.categories:[];const removedCategories=[...new Set((Array.isArray(source.removedCategories)?source.removedCategories:[]).map(text).filter(id=>CATEGORIES.some(category=>category.id===id)))];const categories=[];const seen=new Set();
     for(const item of supplied){const id=text(item?.id);const base=CATEGORIES.find(category=>category.id===id);const label=text(item?.label);if(!id||seen.has(id)||removedCategories.includes(id)||(!base&&!/^custom-[a-z0-9-]+$/.test(id))||(!base&&!label))continue;const icon=CATEGORY_ICON_IDS.includes(text(item?.icon))?text(item.icon):(base?.icon||'grid');const color=CATEGORY_COLORS.includes(text(item?.color).toUpperCase())?text(item.color).toUpperCase():(base?.color||CATEGORY_COLORS[0]);categories.push({id,label:label||base.label,icon,color});seen.add(id)}
@@ -116,7 +116,7 @@
     const orders={};for(const [categoryId,ids] of Object.entries(source.orders&&typeof source.orders==='object'?source.orders:{})){if(categoryIds.has(categoryId)&&Array.isArray(ids))orders[categoryId]=[...new Set(ids.map(text).filter(Boolean))]}
     const customApps=(Array.isArray(source.customApps)?source.customApps:[]).filter(item=>text(item?.id)&&text(item?.displayName)&&isUrl(item?.productionUrl)).map(item=>({id:text(item.id),displayName:text(item.displayName),description:text(item.description)||'追加した業務アプリ',category:categoryIds.has(text(item.category))?text(item.category):'admin',productionUrl:text(item.productionUrl),parentSystem:text(item.parentSystem)||'追加カード',keywords:Array.isArray(item.keywords)?item.keywords.map(text).filter(Boolean):[],favorite:item.favorite!==false,recent:item.recent!==false,status:'active'}));
     const archived=[...new Set((Array.isArray(source.archived)?source.archived:[]).map(text).filter(Boolean))];const deleted=[...new Set((Array.isArray(source.deleted)?source.deleted:[]).map(text).filter(Boolean))];
-    return {categories,removedCategories,assignments,orders,devices,cardOverrides,customApps,archived,deleted};
+    return {categories,removedCategories,assignments,orders,devices,cardOverrides,customApps,archived,deleted,replaceCatalog:source.replaceCatalog===true};
   }
   function categoryDefinition(id,categories){
     const list=Array.isArray(categories)?categories:CATEGORIES;const item=list.find(category=>category.id===id);if(Array.isArray(categories)&&!item&&list.length)return categoryDefinition(list[0].id,list);const base=CATEGORIES.find(category=>category.id===id);if(!item&&!base)return CATEGORIES.at(-1);
