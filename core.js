@@ -1,0 +1,74 @@
+(function(root,factory){
+  const api=factory();
+  if(typeof module==='object'&&module.exports)module.exports=api;
+  root.StepWorkspaceCore=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+  'use strict';
+  const CATEGORIES=[
+    {id:'student',label:'生徒・授業',className:'category-student',initial:'生'},
+    {id:'contact',label:'連絡・受付',className:'category-contact',initial:'連'},
+    {id:'billing',label:'請求・会計',className:'category-billing',initial:'請'},
+    {id:'teacher',label:'講師',className:'category-teacher',initial:'講'},
+    {id:'admin',label:'管理・その他',className:'category-admin',initial:'管'}
+  ];
+  const URL_FIELDS=['利用者向けURL','本番URL','アプリURL','WebアプリURL','Apps Script WebアプリURL','管理者向けURL','読み取りURL','入力フォームURL','Google Sheet URL','GitHub Pages URL'];
+  const DESCRIPTION_RULES=[
+    [/請求管理システムV?3\.1|学費計算/, '学費計算と請求データの作成・確認'],
+    [/請求書PDF|invoice/i, '請求書PDFの作成・配信・入金管理'],
+    [/配信|メッセージ/, '生徒・保護者へのお知らせ配信'],
+    [/不達メール/, '届かなかったメールの確認と管理'],
+    [/出退|QR作成・読取/, '入退室QRの作成と読み取り'],
+    [/講師ポータル/, '講師向け情報と業務メニュー'],
+    [/講師マスター|給与明細/, '講師情報と給与明細の管理'],
+    [/講師予定|出勤登録/, '講師予定と出勤情報の登録'],
+    [/学習進捗/, '生徒の学習状況と進捗を確認'],
+    [/成績管理/, 'テスト成績・通知表・志望校を管理'],
+    [/面談メモ/, '面談内容の記録と確認'],
+    [/過去問/, '過去問題の登録・検索・閲覧'],
+    [/生徒マスタ/, '生徒情報の確認と管理'],
+    [/受付カード|エントリーシート/, '受付情報の読み取りと登録'],
+    [/お問い合わせ/, 'お問い合わせ内容の確認と対応'],
+    [/塾生アプリ/, '塾生向け機能をまとめた共通入口'],
+    [/統合管理ポータル/, 'STEPの管理機能をまとめた入口'],
+    [/資産管理/, 'システム情報の調査と保守']
+  ];
+  function text(value){return String(value==null?'':value).trim()}
+  function normalize(value){return text(value).toLowerCase().normalize('NFKC').replace(/[\s　]+/g,'')}
+  function isUrl(value){try{const u=new URL(text(value));return u.protocol==='https:'||u.protocol==='http:'}catch(_){return false}}
+  function firstUrl(item){for(const key of URL_FIELDS){const value=text(item[key]);if(isUrl(value))return value}return ''}
+  function nameOf(item){return text(item['正式名称']||item['システム名']||item['名称']||item.name||'名称未設定')}
+  function idOf(item){return text(item.ID||item.id)||normalize(nameOf(item)).replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff-]/g,'-')}
+  function categoryId(item){
+    const value=nameOf(item)+' '+text(item['分類'])+' '+text(item['概要']);
+    if(/請求|会計|領収|学費|invoice/i.test(value))return 'billing';
+    if(/講師|先生|給与|出勤/.test(value))return 'teacher';
+    if(/配信|メッセージ|不達|出退|QR|受付|問い合わせ|連絡/.test(value))return 'contact';
+    if(/生徒|塾生|成績|学習|授業|面談|過去問|エントリー/.test(value))return 'student';
+    return 'admin';
+  }
+  function descriptionOf(item){
+    const raw=text(item['業務ホーム説明']||item['概要']||item['説明']);
+    if(raw&&raw.length<=74&&!/GitHub|Apps Script|Cloudflare|D1|R2|Supabase|デプロイ|リポジトリ/i.test(raw))return raw.replace(/[。.]$/,'');
+    const name=nameOf(item);
+    const match=DESCRIPTION_RULES.find(([pattern])=>pattern.test(name));
+    return match?match[1]:'業務アプリを開く';
+  }
+  function keywordsOf(item,category){
+    const explicit=text(item['検索キーワード']||item['キーワード']);
+    const aliases=[];const name=nameOf(item);
+    if(/請求/.test(name))aliases.push('せいきゅう 請求書 PDF 会計');
+    if(/講師/.test(name))aliases.push('こうし 先生');
+    if(/生徒|塾生/.test(name))aliases.push('せいと 学生');
+    if(/配信|メッセージ/.test(name))aliases.push('はいしん 連絡 メール');
+    return [name,descriptionOf(item),category.label,explicit,...aliases].join(' ');
+  }
+  function toApp(item){
+    const category=CATEGORIES.find(value=>value.id===categoryId(item))||CATEGORIES.at(-1);
+    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url:firstUrl(item),categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
+  }
+  function buildApps(items){const seen=new Set();return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(seen.has(app.id))return false;seen.add(app.id);return true})}
+  function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
+  function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書PDF/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
+  function groupByCategory(apps){return CATEGORIES.map(category=>({category,apps:apps.filter(app=>app.categoryId===category.id)})).filter(group=>group.apps.length)}
+  return {CATEGORIES,URL_FIELDS,normalize,isUrl,firstUrl,nameOf,idOf,categoryId,descriptionOf,toApp,buildApps,filterApps,defaultFavoriteIds,groupByCategory};
+});
