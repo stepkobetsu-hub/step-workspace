@@ -98,7 +98,8 @@
     button.addEventListener('click',async()=>{
       button.disabled=true;status.textContent='新しい7項目・39カードを保存中…';status.className='status';
       try{
-        const response=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken,sharedState:{schemaVersion:1,workspaceConfig:rebuilt,favorites}}),redirect:'follow'});
+        const latestResponse=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken}),redirect:'follow'});const latest=JSON.parse(await latestResponse.text());if(!latestResponse.ok||!latest.success)throw new Error(latest.error||'共有設定の最新版を確認できませんでした。');
+        const response=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken,expectedVersion:Number(latest.version||0),sharedState:{schemaVersion:1,workspaceConfig:rebuilt,favorites}}),redirect:'follow'});
         const result=JSON.parse(await response.text());if(!response.ok||!result.success)throw new Error(result.error||'保存できませんでした。');
         localStorage.setItem('stepWorkspaceConfigV1',JSON.stringify(rebuilt));localStorage.setItem('stepWorkspaceFavoritesV1',JSON.stringify(favorites));status.textContent=`7項目・39カードを作成し、全パソコンへ保存しました（版 ${result.version}）`;status.className='status ok';button.textContent='再作成完了';
       }catch(error){status.textContent=error.message||'保存できませんでした。';status.className='status error';button.disabled=false}

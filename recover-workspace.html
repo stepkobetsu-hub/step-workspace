@@ -52,7 +52,8 @@
     button.addEventListener('click',async()=>{
       button.disabled=true;status.textContent='全パソコンへ復旧中…';status.className='status';
       try{
-        const response=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken,sharedState:{schemaVersion:1,workspaceConfig:config,favorites:Array.isArray(favorites)?favorites:[]}}),redirect:'follow'});
+        const latestResponse=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'getWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken}),redirect:'follow'});const latest=JSON.parse(await latestResponse.text());if(!latestResponse.ok||!latest.success)throw new Error(latest.error||'共有設定の最新版を確認できませんでした。');
+        const response=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken,expectedVersion:Number(latest.version||0),sharedState:{schemaVersion:1,workspaceConfig:config,favorites:Array.isArray(favorites)?favorites:[]}}),redirect:'follow'});
         const result=JSON.parse(await response.text());
         if(!response.ok||!result.success)throw new Error(result.error||'保存できませんでした。');
         status.textContent=`全パソコンへ復旧しました（版 ${result.version}）`;status.className='status ok';button.textContent='復旧完了';
