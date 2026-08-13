@@ -5,6 +5,7 @@ const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
 
 test('all card links open in a safe new tab',()=>{assert.match(app,/link\.target='_blank'/);assert.match(app,/link\.rel='noopener noreferrer'/)});
 test('categories can be added and deleted through saved history',()=>{assert.match(app,/delete-category-button/);assert.match(app,/deleteCategory\(/);assert.match(app,/removedCategories/);assert.match(app,/commitConfig\(config=>/)});
@@ -19,6 +20,8 @@ test('アプリカードは通常のリンクを使う',()=>{assert.match(html,/
 test('Googleスプレッドシートのカードは専用SVGアイコンを表示する',()=>{assert.match(app,/sheet-app-icon/);assert.match(app,/Google スプレッドシート/);assert.match(app,/sheet-grid/)});
 test('Sheetsカードは専用のSheetsマークを表示する',()=>{assert.match(html,/class="app-icons"/);assert.match(html,/class="sheet-app-icon"/);assert.match(app,/sheet\.hidden=app\.iconType!==\'google-sheet\'/)});
 test('Google Sheets mark is positioned at the card bottom right',()=>{const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');assert.match(css,/\.app-card \.sheet-app-icon\{position:absolute;right:13px;bottom:13px/);assert.match(css,/pointer-events:none/)});
+test('business portal visual hierarchy keeps favorites first and categories compact',()=>{assert.match(html,/class="portal-hero"/);assert.match(html,/必要なアプリにすぐアクセス。日々の業務をもっとスムーズに。/);assert.ok(html.indexOf('id="favoriteSection"')<html.indexOf('class="all-apps-section"'));assert.match(app,/categoryDescription\(/);assert.match(css,/featured-grid\{grid-template-columns:repeat\(5/)});
+test('favicon and PWA icon set is complete',()=>{for(const name of ['favicon.svg','favicon.ico','favicon-32x32.png','icon-192.png','icon-512.png','manifest.webmanifest'])assert.ok(fs.existsSync(path.join(root,name)),name);assert.match(html,/rel="manifest"/);assert.match(html,/favicon-32x32\.png/);const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.webmanifest'),'utf8'));assert.deepEqual(manifest.icons.map(icon=>icon.sizes),['192x192','512x512'])});
 test('項目編集・カード移動・端末指定を端末へ保存する',()=>{assert.match(html,/id="settingsButton"/);assert.match(html,/id="organizeButton"/);assert.match(html,/aria-label="利用端末"/);assert.match(app,/stepWorkspaceConfigV1/);assert.match(app,/moveApp\(/);assert.match(app,/setDevice\(/);assert.match(app,/showModal\(\)/);assert.match(app,/dragstart/)});
 test('戻る・進むと同一項目内の並べ替えを提供する',()=>{assert.match(html,/id="undoButton"/);assert.match(html,/id="redoButton"/);assert.match(html,/class="move-up"/);assert.match(html,/class="move-down"/);assert.match(app,/undoConfig\(/);assert.match(app,/redoConfig\(/);assert.match(app,/reorderApp\(/)});
 test('カード追加とアーカイブ・復元・完全削除を提供する',()=>{for(const id of ['addCardButton','archiveButton','addCardDialog','archiveDialog','archiveList'])assert.match(html,new RegExp(`id="${id}"`));assert.match(app,/addCard\(/);assert.match(app,/archiveApp\(/);assert.match(app,/restoreApp\(/);assert.match(app,/permanentlyDeleteApp\(/);assert.match(app,/この操作は戻せません/)});

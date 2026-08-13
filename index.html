@@ -4,11 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="theme-color" content="#142033">
+  <meta name="theme-color" content="#0F2747">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>STEP 業務ホーム</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260813-15">
+  <link rel="icon" href="favicon.svg?v=20260813-1" type="image/svg+xml">
+  <link rel="icon" href="favicon-32x32.png?v=20260813-1" sizes="32x32" type="image/png">
+  <link rel="icon" href="favicon.ico?v=20260813-1" sizes="any">
+  <link rel="apple-touch-icon" href="icon-192.png?v=20260813-1">
+  <link rel="manifest" href="manifest.webmanifest?v=20260813-1">
+  <link rel="stylesheet" href="styles.css?v=20260813-16">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -18,7 +22,7 @@
 
   <main class="login-screen" id="loginScreen" hidden>
     <section class="login-card" aria-labelledby="loginTitle">
-      <div class="login-brand" aria-hidden="true">S</div>
+      <img class="login-brand" src="favicon.svg" alt="" aria-hidden="true">
       <p class="eyebrow">STEP WORKSPACE</p>
       <h1 id="loginTitle">STEP 業務ホーム</h1>
       <p class="login-lead">日常業務で使うアプリへ、ここからすぐに移動できます。</p>
@@ -38,8 +42,8 @@
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="./" aria-label="STEP 業務ホーム">
-          <span class="brand-mark" aria-hidden="true">S</span>
-          <span><strong>STEP 業務ホーム</strong><small>STEP WORKSPACE</small></span>
+          <img class="brand-mark" src="favicon.svg" alt="" aria-hidden="true">
+          <span><strong>STEP 業務ホーム</strong><small>BUSINESS WORKSPACE</small></span>
         </a>
         <div class="search-wrap">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg>
@@ -56,10 +60,10 @@
     </header>
 
     <main class="content" id="mainContent">
-      <div class="welcome-row">
-        <div><p class="eyebrow">WORKSPACE</p><h1>おはようございます<span id="userName"></span></h1><p>今日使うアプリを選んでください。</p></div>
-        <p class="app-count" id="appCount"></p>
-      </div>
+      <section class="portal-hero" aria-labelledby="portalTitle">
+        <div><p class="eyebrow">STEP BUSINESS PORTAL</p><h1 id="portalTitle">STEP 業務ホーム</h1><p class="hero-copy">必要なアプリにすぐアクセス。日々の業務をもっとスムーズに。</p><p class="user-greeting">おはようございます、<strong id="userName"></strong></p></div>
+        <div class="hero-status"><span>利用できるアプリ</span><strong id="appCount"></strong></div>
+      </section>
 
       <section id="searchSection" hidden>
         <div class="section-heading"><div><p class="section-kicker">SEARCH</p><h2>検索結果</h2></div><p id="searchCount"></p></div>
@@ -144,7 +148,7 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-15"></script>
-  <script src="app.js?v=20260813-15"></script>
+  <script src="core.js?v=20260813-16"></script>
+  <script src="app.js?v=20260813-16"></script>
 </body>
 </html>
