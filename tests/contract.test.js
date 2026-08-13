@@ -32,4 +32,5 @@ test('戻る・進むと同一項目内の並べ替えを提供する',()=>{asse
 test('カード追加とアーカイブ・復元・完全削除を提供する',()=>{for(const id of ['addCardButton','archiveButton','addCardDialog','archiveDialog','archiveList'])assert.match(html,new RegExp(`id="${id}"`));assert.match(app,/addCard\(/);assert.match(app,/archiveApp\(/);assert.match(app,/restoreApp\(/);assert.match(app,/permanentlyDeleteApp\(/);assert.match(app,/この操作は戻せません/)});
 test('明示ログアウトで認証情報だけを削除する',()=>{assert.match(app,/api\('logoutSystemPortal'\)/);assert.match(app,/removeItem\(AUTH_KEY\)/);assert.match(app,/removeItem\(STAFF_CODE_KEY\)/);assert.match(app,/removeItem\(STAFF_PASSWORD_KEY\)/)});
 test('お気に入りと最近使ったアプリを端末へ保存する',()=>{assert.match(app,/stepWorkspaceFavoritesV1/);assert.match(app,/stepWorkspaceRecentV1/);assert.match(app,/slice\(0,5\)/)});
+test('お気に入りボタンはハート表示を使う',()=>{assert.match(html,/>♡<\/span>/);assert.match(app,/active\?'♥':'♡'/);assert.doesNotMatch(app,/active\?'★':'☆'/)});
 test('開発情報を画面文言に露出しない',()=>{for(const term of ['Apps Script Project ID','commit SHA','Worker名','D1','R2','API URL','調査メモ'])assert.doesNotMatch(html,new RegExp(term))});

@@ -101,7 +101,7 @@
     const card=byId('appCardTemplate').content.firstElementChild.cloneNode(true);
     card.dataset.appId=app.id;card.dataset.device=app.device;card.classList.add(app.categoryClass);applyCategoryStyle(card,app);
     const favorite=card.querySelector('.favorite-button');const active=state.favorites.includes(app.id);
-    favorite.hidden=!app.favoriteEnabled;favorite.classList.toggle('is-favorite',active);favorite.querySelector('span').textContent=active?'★':'☆';favorite.setAttribute('aria-label',active?`${app.name}をお気に入りから外す`:`${app.name}をお気に入りに追加`);
+    favorite.hidden=!app.favoriteEnabled;favorite.classList.toggle('is-favorite',active);favorite.querySelector('span').textContent=active?'♥':'♡';favorite.setAttribute('aria-label',active?`${app.name}をお気に入りから外す`:`${app.name}をお気に入りに追加`);
     if(app.favoriteEnabled)favorite.addEventListener('click',()=>toggleFavorite(app.id));
     const device=card.querySelector('.device-control select');device.value=app.device;device.addEventListener('change',event=>setDevice(app.id,event.target.value));
     const edit=card.querySelector('.edit-card-button');edit.setAttribute('aria-label',`${app.name}を編集`);edit.addEventListener('click',()=>openEditCard(app.id));
