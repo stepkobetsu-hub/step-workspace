@@ -104,8 +104,8 @@
   function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label})),removedCategories:[],assignments:{},orders:{},devices:{},customApps:[],archived:[],deleted:[]}}
   function normalizeWorkspaceConfig(value){
     const source=value&&typeof value==='object'?value:{};const defaults=defaultWorkspaceConfig();const supplied=Array.isArray(source.categories)?source.categories:[];const removedCategories=[...new Set((Array.isArray(source.removedCategories)?source.removedCategories:[]).map(text).filter(id=>CATEGORIES.some(category=>category.id===id)))];const categories=[];const seen=new Set();
-    for(const base of CATEGORIES){if(removedCategories.includes(base.id))continue;const custom=supplied.find(item=>text(item?.id)===base.id);categories.push({id:base.id,label:text(custom?.label)||base.label});seen.add(base.id)}
-    for(const item of supplied){const id=text(item?.id);const label=text(item?.label);if(!id||!label||seen.has(id)||!/^custom-[a-z0-9-]+$/.test(id))continue;categories.push({id,label});seen.add(id)}
+    for(const item of supplied){const id=text(item?.id);const base=CATEGORIES.find(category=>category.id===id);const label=text(item?.label);if(!id||seen.has(id)||removedCategories.includes(id)||(!base&&!/^custom-[a-z0-9-]+$/.test(id))||(!base&&!label))continue;categories.push({id,label:label||base.label});seen.add(id)}
+    for(const base of CATEGORIES){if(removedCategories.includes(base.id)||seen.has(base.id))continue;categories.push({id:base.id,label:base.label});seen.add(base.id)}
     const cleanMap=(input,allowed)=>Object.fromEntries(Object.entries(input&&typeof input==='object'?input:{}).filter(([key,val])=>key&&allowed(val)));
     if(!categories.length){categories.push({id:CATEGORIES[0].id,label:CATEGORIES[0].label});removedCategories.splice(removedCategories.indexOf(CATEGORIES[0].id),1)}const categoryIds=new Set(categories.map(category=>category.id));
     const assignments=cleanMap(source.assignments,value=>categoryIds.has(text(value)));

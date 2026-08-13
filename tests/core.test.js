@@ -3,6 +3,7 @@ const assert=require('node:assert/strict');
 const core=require('../core.js');
 
 test('deleted categories stay hidden and future cards fall back safely',()=>{const config=core.normalizeWorkspaceConfig({removedCategories:['billing']});assert.equal(config.categories.some(item=>item.id==='billing'),false);assert.deepEqual(config.removedCategories,['billing']);const [app]=core.applyWorkspaceConfig([{id:'new-billing',categoryId:'billing'}],config);assert.equal(app.categoryId,config.categories[0].id)});
+test('category order is preserved with every card grouped under it',()=>{const config=core.normalizeWorkspaceConfig({categories:[{id:'teacher',label:'講師'},{id:'student',label:'生徒'}]});assert.deepEqual(config.categories.slice(0,2).map(item=>item.id),['teacher','student']);const apps=core.applyWorkspaceConfig([{id:'lesson',categoryId:'teacher'},{id:'grade',categoryId:'student'}],config);const groups=core.groupByCategory(apps,config.categories,{},true);assert.deepEqual(groups.slice(0,2).map(group=>[group.category.id,group.apps[0].id]),[['teacher','lesson'],['student','grade']])});
 
 const records=[
   {ID:'billing','システム名':'請求管理システムV3.1（学費計算・請求データ作成）','利用者向けURL':'https://example.com/billing','概要':'技術情報を含む長い説明 Apps Script'},

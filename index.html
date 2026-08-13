@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>STEP 業務ホーム</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260813-11">
+  <link rel="stylesheet" href="styles.css?v=20260813-12">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -79,10 +79,12 @@
         </section>
 
         <section class="all-apps-section">
-          <div class="section-heading app-management-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div><div class="management-actions"><button id="addCardButton" type="button">＋ カード追加</button><button id="archiveButton" type="button">アーカイブ</button><button id="undoButton" type="button" disabled>← 戻る</button><button id="redoButton" type="button" disabled>進む →</button><button class="organize-button" id="organizeButton" type="button">カードを移動</button></div></div>
-          <p class="organize-help" id="organizeHelp" hidden>カードを別の項目へドラッグするか、カード下部の移動先を選んでください。</p>
-          <nav class="category-tabs" id="categoryTabs" aria-label="アプリ分類"></nav>
-          <div id="categorySections"></div>
+          <div class="section-heading app-management-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div><div class="management-actions"><button id="addCardButton" type="button">＋ カード追加</button><button id="archiveButton" type="button">アーカイブ</button><button id="undoButton" type="button" disabled>← 戻る</button><button id="redoButton" type="button" disabled>進む →</button><button class="organize-button" id="organizeButton" type="button">カード・項目を移動</button></div></div>
+          <p class="organize-help" id="organizeHelp" hidden>カードは左の項目一覧へドロップできます。項目自体も左の一覧でドラッグまたは上下ボタンで並べ替えられます。</p>
+          <div class="category-workspace">
+            <nav class="category-tabs" id="categoryTabs" aria-label="項目一覧"></nav>
+            <div id="categorySections"></div>
+          </div>
         </section>
       </div>
     </main>
@@ -138,7 +140,7 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-11"></script>
-  <script src="app.js?v=20260813-11"></script>
+  <script src="core.js?v=20260813-12"></script>
+  <script src="app.js?v=20260813-12"></script>
 </body>
 </html>
