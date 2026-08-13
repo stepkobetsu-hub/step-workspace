@@ -3,6 +3,7 @@
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
   const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-3';
+  const APP_CATALOG='app-catalog.json?v=20260813-1';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
@@ -48,9 +49,9 @@
     return loadRegistry();
   }
   async function loadRegistry(){
-    const [result,registryExport]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_EXPORT,{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null)]);
+    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_EXPORT,{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG,{cache:'no-store'}).then(response=>response.ok?response.json():null).catch(()=>null)]);
     if(!result.success)throw new Error(result.error||'アプリ一覧を取得できませんでした。');
-    const registered=Array.isArray(registryExport?.apps)?registryExport.apps:[];const source=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;
+    const registered=Array.isArray(registryExport?.apps)?registryExport.apps:[];const systems=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;const source=Core.mergeCatalogSources(systems,catalogExport?.apps);
     state.auth=readAuth();state.apps=Core.buildApps(source);
     if(!state.apps.length)throw new Error('利用できるアプリが登録されていません。');
     state.favorites=readJson(FAVORITES_KEY,null);
@@ -83,11 +84,11 @@
     const card=byId('appCardTemplate').content.firstElementChild.cloneNode(true);
     card.dataset.appId=app.id;card.classList.add(app.categoryClass);
     const favorite=card.querySelector('.favorite-button');const active=state.favorites.includes(app.id);
-    favorite.classList.toggle('is-favorite',active);favorite.querySelector('span').textContent=active?'★':'☆';favorite.setAttribute('aria-label',active?`${app.name}をお気に入りから外す`:`${app.name}をお気に入りに追加`);
-    favorite.addEventListener('click',()=>toggleFavorite(app.id));
+    favorite.hidden=!app.favoriteEnabled;favorite.classList.toggle('is-favorite',active);favorite.querySelector('span').textContent=active?'★':'☆';favorite.setAttribute('aria-label',active?`${app.name}をお気に入りから外す`:`${app.name}をお気に入りに追加`);
+    if(app.favoriteEnabled)favorite.addEventListener('click',()=>toggleFavorite(app.id));
     renderAppIcon(card.querySelector('.app-icon'),app);card.querySelector('.app-copy strong').textContent=app.name;card.querySelector('.app-copy small').textContent=app.description;
     const link=card.querySelector('.app-link');
-    if(app.url){link.href=app.url;link.addEventListener('click',()=>recordRecent(app.id))}
+    if(app.url){link.href=app.url;if(app.recentEnabled)link.addEventListener('click',()=>recordRecent(app.id))}
     else{card.classList.add('is-unavailable');link.removeAttribute('href');link.setAttribute('aria-disabled','true');card.querySelector('.open-label').textContent='本番URL確認中'}
     return card;
   }

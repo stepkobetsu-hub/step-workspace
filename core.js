@@ -8,10 +8,10 @@
     {id:'student',label:'生徒・授業',className:'category-student',initial:'生'},
     {id:'contact',label:'連絡・受付',className:'category-contact',initial:'連'},
     {id:'billing',label:'請求・会計',className:'category-billing',initial:'請'},
-    {id:'teacher',label:'講師',className:'category-teacher',initial:'講'},
-    {id:'admin',label:'管理・その他',className:'category-admin',initial:'管'}
+    {id:'teacher',label:'講師・給与',className:'category-teacher',initial:'講'},
+    {id:'admin',label:'ポイント・その他',className:'category-admin',initial:'他'}
   ];
-  const URL_FIELDS=['利用者向けURL','本番URL','アプリURL','WebアプリURL','Apps Script WebアプリURL','管理者向けURL','読み取りURL','入力フォームURL','Google Sheet URL','GitHub Pages URL'];
+  const URL_FIELDS=['productionUrl','利用者向けURL','本番URL','アプリURL','WebアプリURL','Apps Script WebアプリURL','管理者向けURL','読み取りURL','入力フォームURL','Google Sheet URL','GitHub Pages URL'];
   const DESCRIPTION_RULES=[
     [/請求管理システムV?3\.1|学費計算/, '学費計算と請求データの作成・確認'],
     [/請求書PDF|invoice/i, '請求書PDFの作成・配信・入金管理'],
@@ -36,10 +36,12 @@
   function normalize(value){return text(value).toLowerCase().normalize('NFKC').replace(/[\s　]+/g,'')}
   function isUrl(value){try{const u=new URL(text(value));return u.protocol==='https:'||u.protocol==='http:'}catch(_){return false}}
   function isGoogleSheetUrl(value){try{const u=new URL(text(value));return u.protocol==='https:'&&u.hostname==='docs.google.com'&&u.pathname.startsWith('/spreadsheets/')}catch(_){return false}}
+  function urlKey(value){try{const u=new URL(text(value));u.hash='';u.searchParams.delete('v');return u.href.replace(/\/$/,'')}catch(_){return text(value)}}
   function firstUrl(item){for(const key of URL_FIELDS){const value=text(item[key]);if(isUrl(value))return value}return ''}
-  function nameOf(item){return text(item['正式名称']||item['システム名']||item['名称']||item.name||'名称未設定')}
+  function nameOf(item){return text(item.displayName||item['正式名称']||item['システム名']||item['名称']||item.name||'名称未設定')}
   function idOf(item){return text(item.ID||item.id)||normalize(nameOf(item)).replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff-]/g,'-')}
   function categoryId(item){
+    const explicit=normalize(item.category||item.categoryId||item['分類']);const named=CATEGORIES.find(category=>explicit===normalize(category.id)||explicit===normalize(category.label));if(named)return named.id;
     const name=nameOf(item);const value=name+' '+text(item['分類']);
     if(/請求|会計|領収|学費|invoice/i.test(name))return 'billing';
     if(/出退くん|QR作成|QR読取|不達|配信|問い合わせ|受付/.test(name))return 'contact';
@@ -51,6 +53,8 @@
   }
   function descriptionOf(item){
     const name=nameOf(item);
+    const explicit=text(item.description);
+    if(explicit)return explicit;
     const match=DESCRIPTION_RULES.find(([pattern])=>pattern.test(name));
     if(match)return match[1];
     const raw=text(item['業務ホーム説明']||item['概要']||item['説明']);
@@ -58,20 +62,21 @@
     return '業務アプリを開く';
   }
   function keywordsOf(item,category){
-    const explicit=text(item['検索キーワード']||item['キーワード']);
+    const keywordValue=item.keywords||item['検索キーワード']||item['キーワード'];const explicit=Array.isArray(keywordValue)?keywordValue.join(' '):text(keywordValue);
     const aliases=[];const name=nameOf(item);
     if(/請求/.test(name))aliases.push('せいきゅう 請求書 PDF 会計');
     if(/講師/.test(name))aliases.push('こうし 先生');
     if(/生徒|塾生/.test(name))aliases.push('せいと 学生');
     if(/配信|メッセージ/.test(name))aliases.push('はいしん 連絡 メール');
-    return [name,descriptionOf(item),category.label,explicit,...aliases].join(' ');
+    return [name,descriptionOf(item),text(item.parentSystem),explicit,...aliases].join(' ');
   }
+  function statusOf(item){const explicit=normalize(item.status);if(['active','hidden','legacy'].includes(explicit))return explicit;const value=normalize(item['状態']);if(/旧|廃止|終了|archive|legacy/.test(value))return 'legacy';if(/非表示|hidden/.test(value))return 'hidden';return 'active'}
   function toApp(item){
     const category=CATEGORIES.find(value=>value.id===categoryId(item))||CATEGORIES.at(-1);
     const url=firstUrl(item);
-    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url,iconType:isGoogleSheetUrl(url)?'google-sheet':'category',categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
+    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url,productionUrl:url,parentSystem:text(item.parentSystem),status:statusOf(item),favoriteEnabled:item.favorite!==false,recentEnabled:item.recent!==false,iconType:isGoogleSheetUrl(url)?'google-sheet':'category',categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
   }
-  function buildApps(items){const seen=new Set();return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(seen.has(app.id))return false;seen.add(app.id);return true})}
+  function buildApps(items){const seenIds=new Set();const seenUrls=new Set();return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(app.status!=='active')return false;const key=urlKey(app.url);if(seenIds.has(app.id)||(key&&seenUrls.has(key)))return false;seenIds.add(app.id);if(key)seenUrls.add(key);return true})}
   function plainMarkdown(value){return text(value).replace(/^\[([^\]]+)\]\([^\)]+\)$/,'$1').replace(/`/g,'')}
   function parseRegistryMarkdown(markdown){
     const lines=String(markdown||'').split(/\r?\n/);const start=lines.findIndex(line=>/^\|\s*正式名称\s*\|\s*状態\s*\|/.test(line));if(start<0)return [];
@@ -91,8 +96,13 @@
     }
     details.forEach((item,index)=>{if(!used.has(index))merged.push(item)});return merged;
   }
+  function mergeCatalogSources(registryItems,catalogItems){
+    const catalog=Array.isArray(catalogItems)?catalogItems:[];const replacements=new Set(catalog.flatMap(item=>Array.isArray(item.replaces)?item.replaces:[]).map(normalize));const catalogUrls=new Set(catalog.map(firstUrl).filter(Boolean).map(urlKey));
+    const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))});
+    return [...catalog,...registry];
+  }
   function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
-  function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書PDF/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
+  function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書(?:PDF|作成)/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>value.favoriteEnabled&&pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
   function groupByCategory(apps){return CATEGORIES.map(category=>({category,apps:apps.filter(app=>app.categoryId===category.id)})).filter(group=>group.apps.length)}
-  return {CATEGORIES,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,firstUrl,nameOf,idOf,categoryId,descriptionOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,filterApps,defaultFavoriteIds,groupByCategory};
+  return {CATEGORIES,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,urlKey,firstUrl,nameOf,idOf,categoryId,descriptionOf,statusOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,mergeCatalogSources,filterApps,defaultFavoriteIds,groupByCategory};
 });
