@@ -66,6 +66,7 @@
         <div class="card-tools">
         <label class="device-control"><span class="sr-only">利用端末</span><select aria-label="利用端末"><option value="both">PC＋スマホ</option><option value="desktop">PC</option><option value="mobile">スマホ</option></select></label>
         <button class="favorite-button" type="button" aria-label="お気に入りに追加"><span aria-hidden="true">☆</span></button>
+        <button class="edit-card-button" type="button" aria-label="カードを編集">✎</button>
         <button class="archive-card-button" type="button" aria-label="アーカイブへ移動">×</button>
         </div>
       </div>
@@ -89,14 +90,16 @@
 
   <dialog class="settings-dialog" id="addCardDialog">
     <form class="settings-panel card-form" id="addCardForm">
-      <div class="settings-heading"><div><h2>カードを追加</h2></div><button id="closeAddCardButton" type="button" aria-label="閉じる">×</button></div>
+      <div class="settings-heading"><div><h2 id="cardDialogTitle">カードを追加</h2></div><button id="closeAddCardButton" type="button" aria-label="閉じる">×</button></div>
+      <input id="editingCardId" type="hidden">
       <label>表示名<input id="cardName" maxlength="50" required></label>
       <label>説明<input id="cardDescription" maxlength="100"></label>
       <label>URL<input id="cardUrl" type="url" placeholder="https://" required></label>
       <label>項目<select id="cardCategory"></select></label>
       <label>利用端末<select id="cardDevice"><option value="both">PC＋スマホ</option><option value="desktop">PC</option><option value="mobile">スマホ</option></select></label>
+      <label class="sheet-mark-option"><input id="cardGoogleSheet" type="checkbox"><span class="sheet-mark-preview" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sheet-page" d="M6.5 2h7l4 4v16h-11a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path class="sheet-fold" d="M13.5 2v4h4"/><path class="sheet-grid" d="M8 10.5h6.5M8 14h6.5M8 17.5h6.5M10.2 10.5v7"/></svg></span><span><strong>Google Sheetsマークを表示</strong><small>カードの右下にGoogle Sheetsのマークを付けます</small></span></label>
       <p class="form-error" id="cardError" role="alert" hidden></p>
-      <div class="settings-footer"><button id="cancelAddCardButton" type="button" class="reset-button">キャンセル</button><button class="primary-button dialog-close" type="submit">追加</button></div>
+      <div class="settings-footer"><button id="cancelAddCardButton" type="button" class="reset-button">キャンセル</button><button class="primary-button dialog-close" id="saveCardButton" type="submit">追加</button></div>
     </form>
   </dialog>
 
@@ -109,7 +112,7 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-19"></script>
-  <script src="app.js?v=20260813-19"></script>
+  <script src="core.js?v=20260813-21"></script>
+  <script src="app.js?v=20260813-21"></script>
 </body>
 </html>
