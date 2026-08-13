@@ -14,7 +14,8 @@ STEPで日常的に使う業務アプリを、検索・お気に入り・最近�
 - Google Sheets直リンクは、カード右下へ専用のSheetsマークを表示します。
 - すべてのカードリンクは新しいブラウザータブで開きます。
 - 白・濃紺・ブルーを基調とした業務ポータルUIで、よく使うアプリを最上位に配置し、PC・タブレット・スマートフォンへ対応します。
-- STEPの「S」を抽象化したSVGファビコンを正本とし、ICO、32px、192px、512pxとWeb App Manifestを提供します。
+- PCでは固定サイドバー、スマートフォンではハンバーガーメニューを使い、管理操作は通常画面と分離した管理モードへまとめています。
+- STEPの「S」を積層カードで抽象化したSVGファビコンを正本とし、ICO、16px、32px、Apple Touch、192px、512pxとWeb App Manifestを提供します。
 - 認証は既存の `staffLogin`、`getSystemRegistry`、`logoutSystemPortal` を利用します。サーバー側で権限2・3・4を毎回確認します。
 - GitHub Pagesへパスワード、APIキー、Apps Scriptの秘密値を埋め込みません。
 

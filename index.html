@@ -7,12 +7,13 @@
   <meta name="theme-color" content="#0F2747">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>STEP 業務ホーム</title>
-  <link rel="icon" href="favicon.svg?v=20260813-1" type="image/svg+xml">
-  <link rel="icon" href="favicon-32x32.png?v=20260813-1" sizes="32x32" type="image/png">
-  <link rel="icon" href="favicon.ico?v=20260813-1" sizes="any">
-  <link rel="apple-touch-icon" href="icon-192.png?v=20260813-1">
-  <link rel="manifest" href="manifest.webmanifest?v=20260813-1">
-  <link rel="stylesheet" href="styles.css?v=20260813-17">
+  <link rel="icon" href="favicon.svg?v=20260813-2" type="image/svg+xml">
+  <link rel="icon" href="favicon-32x32.png?v=20260813-2" sizes="32x32" type="image/png">
+  <link rel="icon" href="favicon-16x16.png?v=20260813-2" sizes="16x16" type="image/png">
+  <link rel="icon" href="favicon.ico?v=20260813-2" sizes="any">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20260813-2">
+  <link rel="manifest" href="manifest.webmanifest?v=20260813-2">
+  <link rel="stylesheet" href="styles.css?v=20260813-18">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -23,7 +24,6 @@
   <main class="login-screen" id="loginScreen" hidden>
     <section class="login-card" aria-labelledby="loginTitle">
       <img class="login-brand" src="favicon.svg" alt="" aria-hidden="true">
-      <p class="eyebrow">STEP WORKSPACE</p>
       <h1 id="loginTitle">STEP 業務ホーム</h1>
       <p class="login-lead">日常業務で使うアプリへ、ここからすぐに移動できます。</p>
       <form id="loginForm">
@@ -39,63 +39,24 @@
   </main>
 
   <div class="app-shell" id="appShell" hidden>
-    <header class="site-header">
-      <div class="header-inner">
-        <a class="brand" href="./" aria-label="STEP 業務ホーム">
-          <img class="brand-mark" src="favicon.svg" alt="" aria-hidden="true">
-          <span><strong>STEP 業務ホーム</strong><small>BUSINESS WORKSPACE</small></span>
-        </a>
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg>
-          <label class="sr-only" for="searchInput">アプリを検索</label>
-          <input id="searchInput" type="search" placeholder="アプリを検索" autocomplete="off">
-          <kbd aria-hidden="true">/</kbd>
-        </div>
-        <nav class="header-actions" aria-label="ユーティリティ">
-          <button id="settingsButton" type="button">項目を追加・設定</button>
-          <a href="https://stepkobetsu-hub.github.io/step-system-registry/">資産管理</a>
-          <button id="logoutButton" type="button">ログアウト</button>
-        </nav>
+    <aside class="portal-sidebar" id="portalSidebar">
+      <a class="sidebar-brand" href="#home" aria-label="STEP 業務ホーム"><img src="favicon.svg" alt=""><span><strong>STEP 業務ホーム</strong><small>WORKSPACE</small></span></a>
+      <a class="sidebar-home is-active" href="#home"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>ホーム</a>
+      <div class="sidebar-divider"></div><p class="sidebar-label">カテゴリ</p>
+      <div class="category-search"><div class="search-wrap category-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg><label class="sr-only" for="categorySearch">カテゴリを検索</label><input id="categorySearch" type="search" placeholder="カテゴリを検索" autocomplete="off"></div></div>
+      <nav class="category-tabs" id="categoryTabs" aria-label="項目一覧"></nav><p class="category-nav-empty" id="categoryNavEmpty" hidden>該当する項目がありません</p>
+      <div class="sidebar-management">
+        <button class="management-toggle" id="managementButton" type="button"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.2 15a1.7 1.7 0 0 0-1.6-1H2v-4h.6a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06L6.66 4.2l.06.06A1.7 1.7 0 0 0 8.6 4.6a1.7 1.7 0 0 0 1-1.6V2h4v1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19 9a1.7 1.7 0 0 0 1.6 1h1.4v4h-1.4a1.7 1.7 0 0 0-1.2 1Z"/></svg>管理・設定</button>
+        <div class="management-panel" id="managementPanel" hidden><button id="addCardButton" type="button">カード追加</button><button id="settingsButton" type="button">項目設定</button><button id="organizeButton" type="button">並べ替え</button><button id="archiveButton" type="button">アーカイブ</button><div class="history-actions"><button id="undoButton" type="button" disabled>戻る</button><button id="redoButton" type="button" disabled>進む</button></div><a href="https://stepkobetsu-hub.github.io/step-system-registry/">資産管理</a><button class="management-finish" id="finishManagementButton" type="button">完了</button></div>
       </div>
-    </header>
-
-    <main class="content" id="mainContent">
-      <section class="portal-hero" aria-labelledby="portalTitle">
-        <div><p class="eyebrow">STEP BUSINESS PORTAL</p><h1 id="portalTitle">STEP 業務ホーム</h1><p class="hero-copy">必要なアプリにすぐアクセス。日々の業務をもっとスムーズに。</p><p class="user-greeting">おはようございます、<strong id="userName"></strong></p></div>
-        <div class="hero-status"><span>利用できるアプリ</span><strong id="appCount"></strong></div>
-      </section>
-
-      <section id="searchSection" hidden>
-        <div class="section-heading"><div><p class="section-kicker">SEARCH</p><h2>検索結果</h2></div><p id="searchCount"></p></div>
-        <div class="app-grid" id="searchGrid"></div>
-        <div class="empty-state" id="searchEmpty" hidden><strong>該当するアプリがありません</strong><p>別のキーワードで検索してください。</p></div>
-      </section>
-
-      <div id="defaultSections">
-        <section id="favoriteSection">
-          <div class="section-heading"><div><p class="section-kicker">FAVORITES</p><h2>よく使うアプリ</h2></div><p>☆で追加・解除できます</p></div>
-          <div class="app-grid featured-grid" id="favoriteGrid"></div>
-        </section>
-
-        <section id="recentSection" hidden>
-          <div class="section-heading"><div><p class="section-kicker">RECENT</p><h2>最近使ったアプリ</h2></div></div>
-          <div class="app-grid compact-grid" id="recentGrid"></div>
-        </section>
-
-        <section class="all-apps-section">
-          <div class="section-heading app-management-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div><div class="management-actions"><button id="addCardButton" type="button">＋ カード追加</button><button id="archiveButton" type="button">アーカイブ</button><button id="undoButton" type="button" disabled>← 戻る</button><button id="redoButton" type="button" disabled>進む →</button><button class="organize-button" id="organizeButton" type="button">カード・項目を移動</button></div></div>
-          <p class="organize-help" id="organizeHelp" hidden>カードは左の項目一覧へドロップできます。項目自体も左の一覧でドラッグまたは上下ボタンで並べ替えられます。</p>
-          <div class="category-workspace">
-            <aside class="category-sidebar">
-              <div class="category-search"><span>項目一覧</span><div class="search-wrap category-search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg><label class="sr-only" for="categorySearch">アプリを検索</label><input id="categorySearch" type="search" placeholder="アプリを検索" autocomplete="off"></div></div>
-              <nav class="category-tabs" id="categoryTabs" aria-label="項目一覧"></nav>
-              <p class="category-nav-empty" id="categoryNavEmpty" hidden>該当する項目がありません</p>
-            </aside>
-            <div id="categorySections"></div>
-          </div>
-        </section>
-      </div>
-    </main>
+    </aside>
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="メニューを閉じる"></button>
+    <div class="portal-main">
+      <header class="site-header"><button class="mobile-menu" id="mobileMenuButton" type="button" aria-label="メニューを開く">☰</button><div class="page-title"><h1>STEP 業務ホーム</h1><p>必要なアプリへ、ここからすぐアクセスできます。</p></div><div class="header-tools"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg><label class="sr-only" for="searchInput">アプリ名・用途から検索</label><input id="searchInput" type="search" placeholder="アプリ名・用途から検索" autocomplete="off"><kbd aria-hidden="true">/</kbd></div><section class="search-popover" id="searchSection" hidden><div class="search-result-head"><strong>検索結果</strong><span id="searchCount"></span></div><div id="searchGrid"></div><div class="empty-state" id="searchEmpty" hidden><strong>該当するアプリがありません</strong></div></section></div><button class="header-settings" id="headerSettingsButton" type="button" aria-label="管理・設定">⚙</button><button class="header-logout" id="logoutButton" type="button">ログアウト</button></div></header>
+      <main class="content" id="mainContent"><span id="userName" hidden></span><span id="appCount" hidden></span><div id="home"></div>
+        <div id="defaultSections"><section id="favoriteSection"><div class="section-heading"><h2>よく使うアプリ</h2></div><div class="app-grid featured-grid" id="favoriteGrid"></div></section><section id="recentSection" hidden><div class="section-heading"><h2>最近使ったアプリ</h2></div><div class="app-grid compact-grid" id="recentGrid"></div></section><section class="all-apps-section"><div class="section-heading"><h2>用途から探す</h2></div><p class="organize-help" id="organizeHelp" hidden>カードをカテゴリへドラッグするか、カード下部の移動先を選択してください。</p><div id="categorySections"></div></section></div>
+      </main>
+    </div>
   </div>
 
   <template id="appCardTemplate">
@@ -109,7 +70,7 @@
         </div>
       </div>
       <a class="app-link">
-        <span class="app-copy"><strong></strong><small></small></span>
+        <span class="app-copy"><strong></strong><small></small><em class="app-category-tag"></em></span>
         <span class="open-label">開く <span aria-hidden="true">→</span></span>
       </a>
       <div class="move-control" hidden><label><span>移動先</span><select aria-label="カードの移動先"></select></label><button class="move-up" type="button" aria-label="前へ移動">↑</button><button class="move-down" type="button" aria-label="後ろへ移動">↓</button></div>
@@ -118,7 +79,7 @@
 
   <dialog class="settings-dialog" id="settingsDialog">
     <form method="dialog" class="settings-panel">
-      <div class="settings-heading"><div><p class="section-kicker">CATEGORIES</p><h2>項目の設定</h2></div><button type="submit" aria-label="閉じる">×</button></div>
+      <div class="settings-heading"><div><h2>項目の設定</h2></div><button type="submit" aria-label="閉じる">×</button></div>
       <p>項目名の変更・追加・削除ができます。項目を削除した場合、中のカードは別の項目へ移動します。</p>
       <div class="category-editor" id="categoryEditor"></div>
       <div class="add-category"><label for="newCategoryName">新しい項目名</label><div><input id="newCategoryName" maxlength="24" placeholder="例：校舎運営"><button id="addCategoryButton" type="button">追加</button></div></div>
@@ -128,7 +89,7 @@
 
   <dialog class="settings-dialog" id="addCardDialog">
     <form class="settings-panel card-form" id="addCardForm">
-      <div class="settings-heading"><div><p class="section-kicker">NEW APP</p><h2>カードを追加</h2></div><button id="closeAddCardButton" type="button" aria-label="閉じる">×</button></div>
+      <div class="settings-heading"><div><h2>カードを追加</h2></div><button id="closeAddCardButton" type="button" aria-label="閉じる">×</button></div>
       <label>表示名<input id="cardName" maxlength="50" required></label>
       <label>説明<input id="cardDescription" maxlength="100"></label>
       <label>URL<input id="cardUrl" type="url" placeholder="https://" required></label>
@@ -141,14 +102,14 @@
 
   <dialog class="settings-dialog" id="archiveDialog">
     <form method="dialog" class="settings-panel">
-      <div class="settings-heading"><div><p class="section-kicker">ARCHIVE</p><h2>アーカイブ</h2></div><button type="submit" aria-label="閉じる">×</button></div>
+      <div class="settings-heading"><div><h2>アーカイブ</h2></div><button type="submit" aria-label="閉じる">×</button></div>
       <p>復元すると元の項目へ戻ります。×はカードを完全に削除します。</p>
       <div class="archive-list" id="archiveList"></div><div class="empty-state" id="archiveEmpty"><strong>アーカイブは空です</strong></div>
       <div class="settings-footer archive-footer"><button class="primary-button dialog-close" type="submit">閉じる</button></div>
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-16"></script>
-  <script src="app.js?v=20260813-16"></script>
+  <script src="core.js?v=20260813-18"></script>
+  <script src="app.js?v=20260813-18"></script>
 </body>
 </html>
