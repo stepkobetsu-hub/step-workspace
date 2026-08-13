@@ -4,12 +4,14 @@
   root.StepWorkspaceCore=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
+  const CATEGORY_ICON_IDS=['grid','user','chat','wallet','teacher','gear','chart','calendar','file','mail','qr','clock','book','school','calculator','clipboard','star','database','phone','shield'];
+  const CATEGORY_COLORS=['#276EE4','#1D9550','#DD8700','#D54883','#6751C7','#0E8A92','#C2415D','#58708F','#7C5C20','#6D7785'];
   const CATEGORIES=[
-    {id:'student',label:'生徒・授業',className:'category-student',initial:'生'},
-    {id:'contact',label:'連絡・受付',className:'category-contact',initial:'連'},
-    {id:'billing',label:'請求・会計',className:'category-billing',initial:'請'},
-    {id:'teacher',label:'講師・給与',className:'category-teacher',initial:'講'},
-    {id:'admin',label:'ポイント・その他',className:'category-admin',initial:'他'}
+    {id:'student',label:'生徒・授業',className:'category-student',initial:'生',icon:'user',color:'#DD8700'},
+    {id:'contact',label:'連絡・受付',className:'category-contact',initial:'連',icon:'chat',color:'#276EE4'},
+    {id:'billing',label:'請求・会計',className:'category-billing',initial:'請',icon:'wallet',color:'#1D9550'},
+    {id:'teacher',label:'講師・給与',className:'category-teacher',initial:'講',icon:'teacher',color:'#D54883'},
+    {id:'admin',label:'ポイント・その他',className:'category-admin',initial:'他',icon:'gear',color:'#6D7785'}
   ];
   const URL_FIELDS=['productionUrl','利用者向けURL','本番URL','アプリURL','WebアプリURL','Apps Script WebアプリURL','管理者向けURL','読み取りURL','入力フォームURL','Google Sheet URL','GitHub Pages URL'];
   const DESCRIPTION_RULES=[
@@ -101,13 +103,13 @@
     const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))});
     return [...catalog,...registry];
   }
-  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label})),removedCategories:[],assignments:{},orders:{},devices:{},customApps:[],archived:[],deleted:[]}}
+  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label,icon:category.icon,color:category.color})),removedCategories:[],assignments:{},orders:{},devices:{},customApps:[],archived:[],deleted:[]}}
   function normalizeWorkspaceConfig(value){
     const source=value&&typeof value==='object'?value:{};const defaults=defaultWorkspaceConfig();const supplied=Array.isArray(source.categories)?source.categories:[];const removedCategories=[...new Set((Array.isArray(source.removedCategories)?source.removedCategories:[]).map(text).filter(id=>CATEGORIES.some(category=>category.id===id)))];const categories=[];const seen=new Set();
-    for(const item of supplied){const id=text(item?.id);const base=CATEGORIES.find(category=>category.id===id);const label=text(item?.label);if(!id||seen.has(id)||removedCategories.includes(id)||(!base&&!/^custom-[a-z0-9-]+$/.test(id))||(!base&&!label))continue;categories.push({id,label:label||base.label});seen.add(id)}
-    for(const base of CATEGORIES){if(removedCategories.includes(base.id)||seen.has(base.id))continue;categories.push({id:base.id,label:base.label});seen.add(base.id)}
+    for(const item of supplied){const id=text(item?.id);const base=CATEGORIES.find(category=>category.id===id);const label=text(item?.label);if(!id||seen.has(id)||removedCategories.includes(id)||(!base&&!/^custom-[a-z0-9-]+$/.test(id))||(!base&&!label))continue;const icon=CATEGORY_ICON_IDS.includes(text(item?.icon))?text(item.icon):(base?.icon||'grid');const color=CATEGORY_COLORS.includes(text(item?.color).toUpperCase())?text(item.color).toUpperCase():(base?.color||CATEGORY_COLORS[0]);categories.push({id,label:label||base.label,icon,color});seen.add(id)}
+    for(const base of CATEGORIES){if(removedCategories.includes(base.id)||seen.has(base.id))continue;categories.push({id:base.id,label:base.label,icon:base.icon,color:base.color});seen.add(base.id)}
     const cleanMap=(input,allowed)=>Object.fromEntries(Object.entries(input&&typeof input==='object'?input:{}).filter(([key,val])=>key&&allowed(val)));
-    if(!categories.length){categories.push({id:CATEGORIES[0].id,label:CATEGORIES[0].label});removedCategories.splice(removedCategories.indexOf(CATEGORIES[0].id),1)}const categoryIds=new Set(categories.map(category=>category.id));
+    if(!categories.length){categories.push({id:CATEGORIES[0].id,label:CATEGORIES[0].label,icon:CATEGORIES[0].icon,color:CATEGORIES[0].color});removedCategories.splice(removedCategories.indexOf(CATEGORIES[0].id),1)}const categoryIds=new Set(categories.map(category=>category.id));
     const assignments=cleanMap(source.assignments,value=>categoryIds.has(text(value)));
     const devices=cleanMap(source.devices,value=>['desktop','mobile','both'].includes(value));
     const orders={};for(const [categoryId,ids] of Object.entries(source.orders&&typeof source.orders==='object'?source.orders:{})){if(categoryIds.has(categoryId)&&Array.isArray(ids))orders[categoryId]=[...new Set(ids.map(text).filter(Boolean))]}
@@ -117,13 +119,13 @@
   }
   function categoryDefinition(id,categories){
     const list=Array.isArray(categories)?categories:CATEGORIES;const item=list.find(category=>category.id===id);if(Array.isArray(categories)&&!item&&list.length)return categoryDefinition(list[0].id,list);const base=CATEGORIES.find(category=>category.id===id);if(!item&&!base)return CATEGORIES.at(-1);
-    const label=text(item?.label)||base?.label||'その他';return {id:id,label,className:base?.className||'category-custom',initial:(base?.initial||label.charAt(0)||'他'),custom:!base};
+    const label=text(item?.label)||base?.label||'その他';const icon=CATEGORY_ICON_IDS.includes(text(item?.icon))?text(item.icon):(base?.icon||'grid');const color=CATEGORY_COLORS.includes(text(item?.color).toUpperCase())?text(item.color).toUpperCase():(base?.color||CATEGORY_COLORS[0]);return {id,label,className:base?.className||'category-custom',initial:(base?.initial||label.charAt(0)||'他'),icon,color,softColor:`${color}18`,custom:!base};
   }
   function applyWorkspaceConfig(apps,value){
-    const config=normalizeWorkspaceConfig(value);return (Array.isArray(apps)?apps:[]).map(app=>{const category=categoryDefinition(config.assignments[app.id]||app.categoryId,config.categories);return Object.assign({},app,{categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,device:config.devices[app.id]||'both'})});
+    const config=normalizeWorkspaceConfig(value);return (Array.isArray(apps)?apps:[]).map(app=>{const category=categoryDefinition(config.assignments[app.id]||app.categoryId,config.categories);return Object.assign({},app,{categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,categoryIcon:category.icon,categoryColor:category.color,categorySoftColor:category.softColor,device:config.devices[app.id]||'both'})});
   }
   function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
   function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書(?:PDF|作成)/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>value.favoriteEnabled&&pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
   function groupByCategory(apps,categories,orders,includeEmpty){return (Array.isArray(categories)?categories:CATEGORIES).map(item=>{const category=categoryDefinition(item.id,categories);const order=Array.isArray(orders?.[category.id])?orders[category.id]:[];const rank=new Map(order.map((id,index)=>[id,index]));const grouped=apps.filter(app=>app.categoryId===category.id).sort((a,b)=>(rank.get(a.id)??Number.MAX_SAFE_INTEGER)-(rank.get(b.id)??Number.MAX_SAFE_INTEGER));return {category,apps:grouped}}).filter(group=>includeEmpty||group.apps.length)}
-  return {CATEGORIES,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,urlKey,firstUrl,nameOf,idOf,categoryId,descriptionOf,statusOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,mergeCatalogSources,defaultWorkspaceConfig,normalizeWorkspaceConfig,categoryDefinition,applyWorkspaceConfig,filterApps,defaultFavoriteIds,groupByCategory};
+  return {CATEGORIES,CATEGORY_ICON_IDS,CATEGORY_COLORS,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,urlKey,firstUrl,nameOf,idOf,categoryId,descriptionOf,statusOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,mergeCatalogSources,defaultWorkspaceConfig,normalizeWorkspaceConfig,categoryDefinition,applyWorkspaceConfig,filterApps,defaultFavoriteIds,groupByCategory};
 });
