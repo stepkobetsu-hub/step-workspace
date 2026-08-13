@@ -39,3 +39,8 @@ test('用途語検索は関係のない同一カテゴリー機能を混ぜな�
   assert.ok(!payroll.includes('授業報告'));
   assert.deepEqual(core.filterApps(visible,'面談').map(app=>app.name),['面談メモ']);
 });
+
+test('ポイント設定とエントリーシート読取の初期分類を指定どおりにする',()=>{
+  assert.equal(catalog.apps.find(app=>app.id==='point-settings').category,'student');
+  assert.equal(catalog.apps.find(app=>app.id==='entry-import').category,'contact');
+});

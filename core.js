@@ -101,8 +101,27 @@
     const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))});
     return [...catalog,...registry];
   }
+  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label})),assignments:{},orders:{},devices:{}}}
+  function normalizeWorkspaceConfig(value){
+    const source=value&&typeof value==='object'?value:{};const defaults=defaultWorkspaceConfig();const supplied=Array.isArray(source.categories)?source.categories:[];const categories=[];const seen=new Set();
+    for(const base of CATEGORIES){const custom=supplied.find(item=>text(item?.id)===base.id);categories.push({id:base.id,label:text(custom?.label)||base.label});seen.add(base.id)}
+    for(const item of supplied){const id=text(item?.id);const label=text(item?.label);if(!id||!label||seen.has(id)||!/^custom-[a-z0-9-]+$/.test(id))continue;categories.push({id,label});seen.add(id)}
+    const cleanMap=(input,allowed)=>Object.fromEntries(Object.entries(input&&typeof input==='object'?input:{}).filter(([key,val])=>key&&allowed(val)));
+    const categoryIds=new Set(categories.map(category=>category.id));
+    const assignments=cleanMap(source.assignments,value=>categoryIds.has(text(value)));
+    const devices=cleanMap(source.devices,value=>['desktop','mobile','both'].includes(value));
+    const orders={};for(const [categoryId,ids] of Object.entries(source.orders&&typeof source.orders==='object'?source.orders:{})){if(categoryIds.has(categoryId)&&Array.isArray(ids))orders[categoryId]=[...new Set(ids.map(text).filter(Boolean))]}
+    return {categories,assignments,orders,devices};
+  }
+  function categoryDefinition(id,categories){
+    const list=Array.isArray(categories)?categories:CATEGORIES;const item=list.find(category=>category.id===id);const base=CATEGORIES.find(category=>category.id===id);if(!item&&!base)return CATEGORIES.at(-1);
+    const label=text(item?.label)||base?.label||'その他';return {id:id,label,className:base?.className||'category-custom',initial:(base?.initial||label.charAt(0)||'他'),custom:!base};
+  }
+  function applyWorkspaceConfig(apps,value){
+    const config=normalizeWorkspaceConfig(value);return (Array.isArray(apps)?apps:[]).map(app=>{const category=categoryDefinition(config.assignments[app.id]||app.categoryId,config.categories);return Object.assign({},app,{categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,device:config.devices[app.id]||'both'})});
+  }
   function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
   function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書(?:PDF|作成)/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>value.favoriteEnabled&&pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
-  function groupByCategory(apps){return CATEGORIES.map(category=>({category,apps:apps.filter(app=>app.categoryId===category.id)})).filter(group=>group.apps.length)}
-  return {CATEGORIES,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,urlKey,firstUrl,nameOf,idOf,categoryId,descriptionOf,statusOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,mergeCatalogSources,filterApps,defaultFavoriteIds,groupByCategory};
+  function groupByCategory(apps,categories,orders,includeEmpty){return (Array.isArray(categories)?categories:CATEGORIES).map(item=>{const category=categoryDefinition(item.id,categories);const order=Array.isArray(orders?.[category.id])?orders[category.id]:[];const rank=new Map(order.map((id,index)=>[id,index]));const grouped=apps.filter(app=>app.categoryId===category.id).sort((a,b)=>(rank.get(a.id)??Number.MAX_SAFE_INTEGER)-(rank.get(b.id)??Number.MAX_SAFE_INTEGER));return {category,apps:grouped}}).filter(group=>includeEmpty||group.apps.length)}
+  return {CATEGORIES,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,urlKey,firstUrl,nameOf,idOf,categoryId,descriptionOf,statusOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,mergeCatalogSources,defaultWorkspaceConfig,normalizeWorkspaceConfig,categoryDefinition,applyWorkspaceConfig,filterApps,defaultFavoriteIds,groupByCategory};
 });

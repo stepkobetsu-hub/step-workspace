@@ -7,6 +7,9 @@ STEPで日常的に使う業務アプリを、検索・お気に入り・最近�
 - システム詳細はスタッフ認証APIの `getSystemRegistry`、正式なシステム一覧は `SYSTEM_REGISTRY.md` から機械生成した `workspace-apps.json` から取得してマージします。
 - 日常業務で押す画面は `app-catalog.json` で管理し、ID、表示名、説明、用途分類、本番URL、親システム、検索語、`active / hidden / legacy`、お気に入り・最近使ったアプリ対応を保持します。
 - 業務ホームには `active` のみを表示し、同一URLまたは `replaces` 指定の重複カードを除外します。
+- 「分類を設定」から項目名の変更・項目追加ができ、「カードを移動」からドラッグまたは移動先選択で配置を変更できます。
+- 各カードの利用端末は `PC＋スマホ / PC / スマホ` から選択できます。分類・配置・端末指定は同じ端末・ブラウザーの `stepWorkspaceConfigV1` に保存します。
+- Google Sheets直リンクは、用途分類の文字アイコンにSheetsマークを重ねて表示します。
 - 認証は既存の `staffLogin`、`getSystemRegistry`、`logoutSystemPortal` を利用します。サーバー側で権限2・3・4を毎回確認します。
 - GitHub Pagesへパスワード、APIキー、Apps Scriptの秘密値を埋め込みません。
 

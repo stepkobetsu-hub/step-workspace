@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>STEP 業務ホーム</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260813-7">
+  <link rel="stylesheet" href="styles.css?v=20260813-8">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -48,6 +48,7 @@
           <kbd aria-hidden="true">/</kbd>
         </div>
         <nav class="header-actions" aria-label="ユーティリティ">
+          <button id="settingsButton" type="button">分類を設定</button>
           <a href="https://stepkobetsu-hub.github.io/step-system-registry/">資産管理</a>
           <button id="logoutButton" type="button">ログアウト</button>
         </nav>
@@ -78,7 +79,8 @@
         </section>
 
         <section class="all-apps-section">
-          <div class="section-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div></div>
+          <div class="section-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div><button class="organize-button" id="organizeButton" type="button">カードを移動</button></div>
+          <p class="organize-help" id="organizeHelp" hidden>カードを別の項目へドラッグするか、カード下部の移動先を選んでください。</p>
           <nav class="category-tabs" id="categoryTabs" aria-label="アプリ分類"></nav>
           <div id="categorySections"></div>
         </section>
@@ -88,16 +90,30 @@
 
   <template id="appCardTemplate">
     <article class="app-card">
-      <button class="favorite-button" type="button" aria-label="お気に入りに追加"><span aria-hidden="true">☆</span></button>
+      <div class="card-tools">
+        <label class="device-control"><span class="sr-only">利用端末</span><select aria-label="利用端末"><option value="both">PC＋スマホ</option><option value="desktop">PC</option><option value="mobile">スマホ</option></select></label>
+        <button class="favorite-button" type="button" aria-label="お気に入りに追加"><span aria-hidden="true">☆</span></button>
+      </div>
       <a class="app-link">
         <span class="app-icon" aria-hidden="true"></span>
         <span class="app-copy"><strong></strong><small></small></span>
         <span class="open-label">開く <span aria-hidden="true">→</span></span>
       </a>
+      <label class="move-control" hidden><span>移動先</span><select aria-label="カードの移動先"></select></label>
     </article>
   </template>
 
-  <script src="core.js?v=20260813-7"></script>
-  <script src="app.js?v=20260813-7"></script>
+  <dialog class="settings-dialog" id="settingsDialog">
+    <form method="dialog" class="settings-panel">
+      <div class="settings-heading"><div><p class="section-kicker">CATEGORIES</p><h2>項目の設定</h2></div><button type="submit" aria-label="閉じる">×</button></div>
+      <p>項目名は変更できます。新しい項目を追加すると、カードの移動先として選べます。</p>
+      <div class="category-editor" id="categoryEditor"></div>
+      <div class="add-category"><label for="newCategoryName">新しい項目名</label><div><input id="newCategoryName" maxlength="24" placeholder="例：校舎運営"><button id="addCategoryButton" type="button">追加</button></div></div>
+      <div class="settings-footer"><button class="reset-button" id="resetLayoutButton" type="button">初期設定に戻す</button><button class="primary-button dialog-close" type="submit">完了</button></div>
+    </form>
+  </dialog>
+
+  <script src="core.js?v=20260813-8"></script>
+  <script src="app.js?v=20260813-8"></script>
 </body>
 </html>
