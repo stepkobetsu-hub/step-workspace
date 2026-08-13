@@ -14,7 +14,7 @@ test('台帳の正式URLを優先してアプリへ変換する',()=>{const app=
 test('請求管理と請求書PDFを別アプリとして保持する',()=>{const apps=core.buildApps(records);assert.notEqual(apps[0].id,apps[1].id);assert.equal(apps.filter(app=>app.categoryId==='billing').length,2)});
 test('日本語の名前・説明・キーワードでリアルタイム検索できる',()=>{const apps=core.buildApps(records);assert.deepEqual(core.filterApps(apps,'請求').map(app=>app.id),['billing','invoice']);assert.ok(core.filterApps(apps,'はいしん').some(app=>app.id==='message'))});
 test('用途別に5分類する',()=>{const apps=core.buildApps(records);assert.equal(apps.find(app=>app.id==='message').categoryId,'contact');assert.equal(apps.find(app=>app.id==='teacher').categoryId,'teacher');assert.equal(apps.find(app=>app.id==='grades').categoryId,'student')});
-test('説明文に請求が含まれても講師予定は講師へ分類する',()=>{const app=core.toApp({ID:'schedule','システム名':'講師予定・夏休み出勤登録','概要':'請求処理と連携する講師予定'});assert.equal(app.categoryId,'teacher')});
+test('説明文に請求が含まれても講師予定は講師へ分類し請求検索へ混ぜない',()=>{const app=core.toApp({ID:'schedule','システム名':'講師予定・夏休み出勤登録','概要':'請求処理と連携する講師予定'});assert.equal(app.categoryId,'teacher');assert.equal(core.filterApps([app],'請求').length,0)});
 test('出退くんQRは台帳分類に講師が含まれても連絡・受付へ分類する',()=>{const app=core.toApp({ID:'qr','システム名':'出退くんQR作成・読取','分類':'生徒・講師'});assert.equal(app.categoryId,'contact')});
 test('既定のお気に入りは主要業務を最大5件選ぶ',()=>{const ids=core.defaultFavoriteIds(core.buildApps(records));assert.ok(ids.includes('billing'));assert.ok(ids.includes('invoice'));assert.ok(ids.includes('message'));assert.ok(ids.length<=5)});
 test('HTTP以外や要確認の値をリンクにしない',()=>{assert.equal(core.firstUrl({'利用者向けURL':'要確認'}),'');assert.equal(core.firstUrl({'利用者向けURL':'javascript:alert(1)'}),'')});

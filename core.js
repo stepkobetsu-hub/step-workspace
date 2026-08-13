@@ -49,11 +49,12 @@
     return 'admin';
   }
   function descriptionOf(item){
-    const raw=text(item['業務ホーム説明']||item['概要']||item['説明']);
-    if(raw&&raw.length<=74&&!/GitHub|Apps Script|Cloudflare|D1|R2|Supabase|デプロイ|リポジトリ/i.test(raw))return raw.replace(/[。.]$/,'');
     const name=nameOf(item);
     const match=DESCRIPTION_RULES.find(([pattern])=>pattern.test(name));
-    return match?match[1]:'業務アプリを開く';
+    if(match)return match[1];
+    const raw=text(item['業務ホーム説明']||item['概要']||item['説明']);
+    if(raw&&raw.length<=74&&!/GitHub|Apps Script|Cloudflare|D1|R2|Supabase|デプロイ|リポジトリ/i.test(raw))return raw.replace(/[。.]$/,'');
+    return '業務アプリを開く';
   }
   function keywordsOf(item,category){
     const explicit=text(item['検索キーワード']||item['キーワード']);
