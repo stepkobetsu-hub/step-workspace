@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>STEP 業務ホーム</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260813-9">
+  <link rel="stylesheet" href="styles.css?v=20260813-10">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -109,7 +109,7 @@
   <dialog class="settings-dialog" id="settingsDialog">
     <form method="dialog" class="settings-panel">
       <div class="settings-heading"><div><p class="section-kicker">CATEGORIES</p><h2>項目の設定</h2></div><button type="submit" aria-label="閉じる">×</button></div>
-      <p>項目名は変更できます。新しい項目を追加すると、カードの移動先として選べます。</p>
+      <p>項目名の変更・追加・削除ができます。項目を削除した場合、中のカードは別の項目へ移動します。</p>
       <div class="category-editor" id="categoryEditor"></div>
       <div class="add-category"><label for="newCategoryName">新しい項目名</label><div><input id="newCategoryName" maxlength="24" placeholder="例：校舎運営"><button id="addCategoryButton" type="button">追加</button></div></div>
       <div class="settings-footer"><button class="reset-button" id="resetLayoutButton" type="button">初期設定に戻す</button><button class="primary-button dialog-close" type="submit">完了</button></div>
@@ -138,7 +138,7 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-9"></script>
-  <script src="app.js?v=20260813-9"></script>
+  <script src="core.js?v=20260813-10"></script>
+  <script src="app.js?v=20260813-10"></script>
 </body>
 </html>

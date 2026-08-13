@@ -2,6 +2,8 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const core=require('../core.js');
 
+test('deleted categories stay hidden and future cards fall back safely',()=>{const config=core.normalizeWorkspaceConfig({removedCategories:['billing']});assert.equal(config.categories.some(item=>item.id==='billing'),false);assert.deepEqual(config.removedCategories,['billing']);const [app]=core.applyWorkspaceConfig([{id:'new-billing',categoryId:'billing'}],config);assert.equal(app.categoryId,config.categories[0].id)});
+
 const records=[
   {ID:'billing','システム名':'請求管理システムV3.1（学費計算・請求データ作成）','利用者向けURL':'https://example.com/billing','概要':'技術情報を含む長い説明 Apps Script'},
   {ID:'invoice','システム名':'STEP請求書PDF作成・配信システム','利用者向けURL':'https://example.com/invoice'},
