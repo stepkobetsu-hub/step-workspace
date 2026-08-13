@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>STEP 業務ホーム</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260813-8">
+  <link rel="stylesheet" href="styles.css?v=20260813-9">
 </head>
 <body data-state="checking">
   <section class="state-screen loading-screen" id="loadingScreen" aria-live="polite">
@@ -48,7 +48,7 @@
           <kbd aria-hidden="true">/</kbd>
         </div>
         <nav class="header-actions" aria-label="ユーティリティ">
-          <button id="settingsButton" type="button">分類を設定</button>
+          <button id="settingsButton" type="button">項目を追加・設定</button>
           <a href="https://stepkobetsu-hub.github.io/step-system-registry/">資産管理</a>
           <button id="logoutButton" type="button">ログアウト</button>
         </nav>
@@ -79,7 +79,7 @@
         </section>
 
         <section class="all-apps-section">
-          <div class="section-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div><button class="organize-button" id="organizeButton" type="button">カードを移動</button></div>
+          <div class="section-heading app-management-heading"><div><p class="section-kicker">ALL APPS</p><h2>用途から探す</h2></div><div class="management-actions"><button id="addCardButton" type="button">＋ カード追加</button><button id="archiveButton" type="button">アーカイブ</button><button id="undoButton" type="button" disabled>← 戻る</button><button id="redoButton" type="button" disabled>進む →</button><button class="organize-button" id="organizeButton" type="button">カードを移動</button></div></div>
           <p class="organize-help" id="organizeHelp" hidden>カードを別の項目へドラッグするか、カード下部の移動先を選んでください。</p>
           <nav class="category-tabs" id="categoryTabs" aria-label="アプリ分類"></nav>
           <div id="categorySections"></div>
@@ -90,16 +90,19 @@
 
   <template id="appCardTemplate">
     <article class="app-card">
-      <div class="card-tools">
+      <div class="card-head">
+        <span class="app-icons" aria-hidden="true"><span class="app-icon"></span><span class="sheet-app-icon" hidden></span></span>
+        <div class="card-tools">
         <label class="device-control"><span class="sr-only">利用端末</span><select aria-label="利用端末"><option value="both">PC＋スマホ</option><option value="desktop">PC</option><option value="mobile">スマホ</option></select></label>
         <button class="favorite-button" type="button" aria-label="お気に入りに追加"><span aria-hidden="true">☆</span></button>
+        <button class="archive-card-button" type="button" aria-label="アーカイブへ移動">×</button>
+        </div>
       </div>
       <a class="app-link">
-        <span class="app-icon" aria-hidden="true"></span>
         <span class="app-copy"><strong></strong><small></small></span>
         <span class="open-label">開く <span aria-hidden="true">→</span></span>
       </a>
-      <label class="move-control" hidden><span>移動先</span><select aria-label="カードの移動先"></select></label>
+      <div class="move-control" hidden><label><span>移動先</span><select aria-label="カードの移動先"></select></label><button class="move-up" type="button" aria-label="前へ移動">↑</button><button class="move-down" type="button" aria-label="後ろへ移動">↓</button></div>
     </article>
   </template>
 
@@ -113,7 +116,29 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260813-8"></script>
-  <script src="app.js?v=20260813-8"></script>
+  <dialog class="settings-dialog" id="addCardDialog">
+    <form class="settings-panel card-form" id="addCardForm">
+      <div class="settings-heading"><div><p class="section-kicker">NEW APP</p><h2>カードを追加</h2></div><button id="closeAddCardButton" type="button" aria-label="閉じる">×</button></div>
+      <label>表示名<input id="cardName" maxlength="50" required></label>
+      <label>説明<input id="cardDescription" maxlength="100"></label>
+      <label>URL<input id="cardUrl" type="url" placeholder="https://" required></label>
+      <label>項目<select id="cardCategory"></select></label>
+      <label>利用端末<select id="cardDevice"><option value="both">PC＋スマホ</option><option value="desktop">PC</option><option value="mobile">スマホ</option></select></label>
+      <p class="form-error" id="cardError" role="alert" hidden></p>
+      <div class="settings-footer"><button id="cancelAddCardButton" type="button" class="reset-button">キャンセル</button><button class="primary-button dialog-close" type="submit">追加</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="settings-dialog" id="archiveDialog">
+    <form method="dialog" class="settings-panel">
+      <div class="settings-heading"><div><p class="section-kicker">ARCHIVE</p><h2>アーカイブ</h2></div><button type="submit" aria-label="閉じる">×</button></div>
+      <p>復元すると元の項目へ戻ります。×はカードを完全に削除します。</p>
+      <div class="archive-list" id="archiveList"></div><div class="empty-state" id="archiveEmpty"><strong>アーカイブは空です</strong></div>
+      <div class="settings-footer archive-footer"><button class="primary-button dialog-close" type="submit">閉じる</button></div>
+    </form>
+  </dialog>
+
+  <script src="core.js?v=20260813-9"></script>
+  <script src="app.js?v=20260813-9"></script>
 </body>
 </html>

@@ -101,7 +101,7 @@
     const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))});
     return [...catalog,...registry];
   }
-  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label})),assignments:{},orders:{},devices:{}}}
+  function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label})),assignments:{},orders:{},devices:{},customApps:[],archived:[],deleted:[]}}
   function normalizeWorkspaceConfig(value){
     const source=value&&typeof value==='object'?value:{};const defaults=defaultWorkspaceConfig();const supplied=Array.isArray(source.categories)?source.categories:[];const categories=[];const seen=new Set();
     for(const base of CATEGORIES){const custom=supplied.find(item=>text(item?.id)===base.id);categories.push({id:base.id,label:text(custom?.label)||base.label});seen.add(base.id)}
@@ -111,7 +111,9 @@
     const assignments=cleanMap(source.assignments,value=>categoryIds.has(text(value)));
     const devices=cleanMap(source.devices,value=>['desktop','mobile','both'].includes(value));
     const orders={};for(const [categoryId,ids] of Object.entries(source.orders&&typeof source.orders==='object'?source.orders:{})){if(categoryIds.has(categoryId)&&Array.isArray(ids))orders[categoryId]=[...new Set(ids.map(text).filter(Boolean))]}
-    return {categories,assignments,orders,devices};
+    const customApps=(Array.isArray(source.customApps)?source.customApps:[]).filter(item=>text(item?.id)&&text(item?.displayName)&&isUrl(item?.productionUrl)).map(item=>({id:text(item.id),displayName:text(item.displayName),description:text(item.description)||'追加した業務アプリ',category:categoryIds.has(text(item.category))?text(item.category):'admin',productionUrl:text(item.productionUrl),parentSystem:text(item.parentSystem)||'追加カード',keywords:Array.isArray(item.keywords)?item.keywords.map(text).filter(Boolean):[],favorite:item.favorite!==false,recent:item.recent!==false,status:'active'}));
+    const archived=[...new Set((Array.isArray(source.archived)?source.archived:[]).map(text).filter(Boolean))];const deleted=[...new Set((Array.isArray(source.deleted)?source.deleted:[]).map(text).filter(Boolean))];
+    return {categories,assignments,orders,devices,customApps,archived,deleted};
   }
   function categoryDefinition(id,categories){
     const list=Array.isArray(categories)?categories:CATEGORIES;const item=list.find(category=>category.id===id);const base=CATEGORIES.find(category=>category.id===id);if(!item&&!base)return CATEGORIES.at(-1);
