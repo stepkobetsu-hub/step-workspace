@@ -2,6 +2,7 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
+  const REGISTRY_MARKDOWN='https://raw.githubusercontent.com/stepkobetsu-hub/step-system-registry/main/SYSTEM_REGISTRY.md';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
@@ -47,9 +48,10 @@
     return loadRegistry();
   }
   async function loadRegistry(){
-    const result=await api('getSystemRegistry');
+    const [result,markdown]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_MARKDOWN,{cache:'no-store'}).then(response=>response.ok?response.text():'').catch(()=>'')]);
     if(!result.success)throw new Error(result.error||'アプリ一覧を取得できませんでした。');
-    state.auth=readAuth();state.apps=Core.buildApps(result.systems);
+    const registered=Core.parseRegistryMarkdown(markdown);const source=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;
+    state.auth=readAuth();state.apps=Core.buildApps(source);
     if(!state.apps.length)throw new Error('利用できるアプリが登録されていません。');
     state.favorites=readJson(FAVORITES_KEY,null);
     if(!Array.isArray(state.favorites)){state.favorites=Core.defaultFavoriteIds(state.apps);writeJson(FAVORITES_KEY,state.favorites)}

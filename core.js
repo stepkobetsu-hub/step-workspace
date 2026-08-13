@@ -67,8 +67,27 @@
     return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url:firstUrl(item),categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
   }
   function buildApps(items){const seen=new Set();return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(seen.has(app.id))return false;seen.add(app.id);return true})}
+  function plainMarkdown(value){return text(value).replace(/^\[([^\]]+)\]\([^\)]+\)$/,'$1').replace(/`/g,'')}
+  function parseRegistryMarkdown(markdown){
+    const lines=String(markdown||'').split(/\r?\n/);const start=lines.findIndex(line=>/^\|\s*正式名称\s*\|\s*状態\s*\|/.test(line));if(start<0)return [];
+    const records=[];
+    for(let index=start+2;index<lines.length;index+=1){const line=lines[index];if(!/^\s*\|/.test(line))break;const columns=line.replace(/^\s*\||\|\s*$/g,'').split('|').map(value=>value.trim());if(columns.length<3)continue;
+      records.push({'正式名称':plainMarkdown(columns[0]),'状態':plainMarkdown(columns[1]),'利用者向けURL':plainMarkdown(columns[2])});
+    }
+    return records;
+  }
+  function mergeRegistrySources(apiItems,markdownItems){
+    const details=(Array.isArray(apiItems)?apiItems:[]).map(item=>Object.assign({},item));const used=new Set();const merged=[];
+    for(const registryItem of Array.isArray(markdownItems)?markdownItems:[]){
+      const registryName=normalize(nameOf(registryItem));const registryUrl=firstUrl(registryItem);let bestIndex=-1;let bestScore=0;
+      details.forEach((item,index)=>{if(used.has(index))return;const itemName=normalize(nameOf(item));const itemUrl=firstUrl(item);let score=0;if(registryName===itemName)score=100;else if(registryName&&itemName&&(registryName.includes(itemName)||itemName.includes(registryName)))score=60+Math.min(registryName.length,itemName.length);if(registryUrl&&itemUrl&&registryUrl===itemUrl)score+=50;if(score>bestScore){bestScore=score;bestIndex=index}});
+      const base=bestIndex>=0?(used.add(bestIndex),details[bestIndex]):{};const item=Object.assign({},base,registryItem);
+      if(!firstUrl(registryItem)&&firstUrl(base))item['利用者向けURL']=firstUrl(base);merged.push(item);
+    }
+    details.forEach((item,index)=>{if(!used.has(index))merged.push(item)});return merged;
+  }
   function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
   function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書PDF/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
   function groupByCategory(apps){return CATEGORIES.map(category=>({category,apps:apps.filter(app=>app.categoryId===category.id)})).filter(group=>group.apps.length)}
-  return {CATEGORIES,URL_FIELDS,normalize,isUrl,firstUrl,nameOf,idOf,categoryId,descriptionOf,toApp,buildApps,filterApps,defaultFavoriteIds,groupByCategory};
+  return {CATEGORIES,URL_FIELDS,normalize,isUrl,firstUrl,nameOf,idOf,categoryId,descriptionOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,filterApps,defaultFavoriteIds,groupByCategory};
 });
