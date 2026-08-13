@@ -8,6 +8,7 @@ const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 
 test('all card links open in a safe new tab',()=>{assert.match(app,/link\.target='_blank'/);assert.match(app,/link\.rel='noopener noreferrer'/)});
 test('categories can be added and deleted through saved history',()=>{assert.match(app,/delete-category-button/);assert.match(app,/deleteCategory\(/);assert.match(app,/removedCategories/);assert.match(app,/commitConfig\(config=>/)});
+test('empty categories remain visible as card move destinations',()=>{assert.match(app,/groupByCategory\(state\.apps,state\.config\.categories,state\.config\.orders,true\)/);assert.match(app,/is-empty-category/);assert.match(app,/ここへカードを移動できます/)});
 
 test('起動時は認証確認画面だけを表示する',()=>{assert.match(html,/body data-state="checking"/);assert.match(html,/id="loginScreen" hidden/);assert.match(html,/id="appShell" hidden/);assert.match(app,/setScreen\('checking'\)/)});
 test('スタッフ共通認証と台帳・機能カタログを再利用する',()=>{assert.match(app,/api\('staffLogin'/);assert.match(app,/api\('getSystemRegistry'\)/);assert.match(app,/workspace-apps\.json/);assert.match(app,/app-catalog\.json/);assert.match(app,/mergeRegistrySources/);assert.match(app,/mergeCatalogSources/);assert.match(app,/stepStaffAppAuth/);assert.match(app,/\['2','3','4'\]/)});

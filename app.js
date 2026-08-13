@@ -119,12 +119,12 @@
     replaceCards(byId('recentGrid'),apps,'recent');byId('recentSection').hidden=!apps.length;
   }
   function renderCategories(){
-    const groups=Core.groupByCategory(state.apps,state.config.categories,state.config.orders,state.organizing);const tabs=byId('categoryTabs');const sections=byId('categorySections');tabs.replaceChildren();sections.replaceChildren();
+    const groups=Core.groupByCategory(state.apps,state.config.categories,state.config.orders,true);const tabs=byId('categoryTabs');const sections=byId('categorySections');tabs.replaceChildren();sections.replaceChildren();
     groups.forEach(({category,apps})=>{
       const anchor=document.createElement('a');anchor.href=`#category-${category.id}`;anchor.textContent=category.label;tabs.append(anchor);
       const section=document.createElement('section');section.id=`category-${category.id}`;section.className=`category-block ${category.className}`;
       const header=document.createElement('div');header.className='category-header';header.innerHTML=`<i class="category-dot" aria-hidden="true"></i><h3></h3><span></span>`;header.querySelector('h3').textContent=category.label;header.querySelector('span').textContent=`${apps.length}件`;
-      const grid=document.createElement('div');grid.className='app-grid';grid.dataset.categoryId=category.id;replaceCards(grid,apps,'category');grid.addEventListener('dragover',event=>{if(!state.organizing)return;event.preventDefault();grid.classList.add('is-drop-target')});grid.addEventListener('dragleave',()=>grid.classList.remove('is-drop-target'));grid.addEventListener('drop',event=>{event.preventDefault();grid.classList.remove('is-drop-target');moveApp(event.dataTransfer.getData('text/plain'),category.id)});section.append(header,grid);sections.append(section);
+      const grid=document.createElement('div');grid.className='app-grid';grid.dataset.categoryId=category.id;replaceCards(grid,apps,'category');if(!apps.length){grid.classList.add('is-empty-category');const empty=document.createElement('p');empty.textContent=state.organizing?'ここへカードを移動できます':'カードはまだありません';grid.append(empty)}grid.addEventListener('dragover',event=>{if(!state.organizing)return;event.preventDefault();grid.classList.add('is-drop-target')});grid.addEventListener('dragleave',()=>grid.classList.remove('is-drop-target'));grid.addEventListener('drop',event=>{event.preventDefault();grid.classList.remove('is-drop-target');moveApp(event.dataTransfer.getData('text/plain'),category.id)});section.append(header,grid);sections.append(section);
     });
   }
   function renderSearch(){
