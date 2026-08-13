@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>STEP業務ホーム 項目構成の完全復旧</title>
+  <link rel="icon" href="favicon.svg">
+  <style>
+    :root{font-family:system-ui,"Yu Gothic",sans-serif;color:#102a4c;background:#f4f7fb}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}main{width:min(680px,100%);padding:32px;border:1px solid #dfe7f1;border-radius:16px;background:#fff;box-shadow:0 18px 55px rgba(15,39,71,.12)}h1{margin:0 0 10px;font-size:26px}p{color:#5c6d82;line-height:1.7}.preview{margin:22px 0;padding:18px;border-radius:12px;background:#f4f7fb}.preview strong{display:block;margin-bottom:8px}.preview ol{margin:0;padding-left:28px;line-height:1.9}.preview li span{float:right;color:#65758a}button{width:100%;min-height:52px;border:0;border-radius:10px;background:#1769e0;color:#fff;font-size:16px;font-weight:700;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}.status{min-height:28px;margin:16px 0 0;font-weight:700}.status.ok{color:#177245}.status.error{color:#b4233a}small{display:block;margin-top:18px;color:#738196;line-height:1.6}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>項目構成の完全復旧</h1>
+    <p>版3で救出したカード・URL・端末指定を維持したまま、元画面の7項目とカード順を復元します。</p>
+    <section class="preview" id="preview"><strong>保存データを解析しています…</strong></section>
+    <button id="repairButton" type="button" disabled>この7項目構成で完全復旧する</button>
+    <p class="status" id="status" aria-live="polite"></p>
+    <small>この処理は項目名・項目順を補います。カード本体、URL、利用端末、お気に入りは版3の内容をそのまま維持します。</small>
+  </main>
+  <script>
+  (()=>{
+    'use strict';
+    const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
+    const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
+    const config=read('stepWorkspaceConfigV1',null);
+    const favorites=read('stepWorkspaceFavoritesV1',[]);
+    const auth=read('stepStaffAppAuth',null);
+    const preview=document.getElementById('preview');
+    const button=document.getElementById('repairButton');
+    const status=document.getElementById('status');
+    const expected=[
+      {label:'生徒・授業',count:7,icon:'user',color:'#DD8700',ids:['grade-management'],fallbackId:'student'},
+      {label:'時間割',count:4,icon:'clock',color:'#7C5C20',patterns:[/^時間割$/,/^2026夏休み時間割/,/^夏休み講習時間割/]},
+      {label:'連絡・受付',count:8,icon:'chat',color:'#276EE4',ids:['step-message-center'],fallbackId:'contact'},
+      {label:'管理・運営',count:4,icon:'grid',color:'#276EE4',ids:['timetable-master-input','entry-import','reception-card-reader']},
+      {label:'請求・会計',count:4,icon:'wallet',color:'#1D9550',ids:['invoice-pdf','billing-special-adjustment'],fallbackId:'billing'},
+      {label:'講師・給与',count:7,icon:'teacher',color:'#D54883',ids:['teacher-summer-availability','teacher-payslip'],fallbackId:'teacher'},
+      {label:'ポータル・ホーム',count:5,icon:'grid',color:'#276EE4',patterns:[/^STEPシステム資産管理台帳$/]}
+    ];
+    function fail(message){preview.innerHTML=`<strong>${message}</strong>`;status.textContent='元のSTEP業務ホームは更新・閉じずに、そのままお知らせください。';status.className='status error'}
+    if(!config){fail('復旧対象の配置が見つかりません。');return}
+    const assignments=config.assignments&&typeof config.assignments==='object'?config.assignments:{};
+    const orders=config.orders&&typeof config.orders==='object'?config.orders:{};
+    const customApps=Array.isArray(config.customApps)?config.customApps:[];
+    const archived=new Set(Array.isArray(config.archived)?config.archived:[]);
+    const deleted=new Set(Array.isArray(config.deleted)?config.deleted:[]);
+    const activeCustom=customApps.filter(app=>!archived.has(app.id)&&!deleted.has(app.id));
+    const categoryOf=id=>assignments[id]||Object.keys(orders).find(categoryId=>Array.isArray(orders[categoryId])&&orders[categoryId].includes(id))||customApps.find(app=>app.id===id)?.category||'';
+    const categoryFor=definition=>{
+      for(const id of definition.ids||[]){const categoryId=categoryOf(id);if(categoryId)return categoryId}
+      for(const app of activeCustom){if((definition.patterns||[]).some(pattern=>pattern.test(String(app.displayName||'')))){const categoryId=categoryOf(app.id);if(categoryId)return categoryId}}
+      return definition.fallbackId||'';
+    };
+    const resolved=expected.map(item=>({...item,id:categoryFor(item)}));
+    const ids=resolved.map(item=>item.id);
+    const valid=ids.every(id=>/^(?:student|contact|billing|teacher|admin|custom-[a-z0-9-]+)$/.test(id))&&new Set(ids).size===expected.length;
+    const has5555=activeCustom.some(app=>String(app.displayName||'').trim()==='5555');
+    if(!valid||!has5555){fail(`7項目を安全に識別できませんでした（識別 ${new Set(ids.filter(Boolean)).size}件・5555 ${has5555?'あり':'なし'}）。`);return}
+    const repaired={...config,categories:resolved.map(item=>({id:item.id,label:item.label,icon:item.icon,color:item.color})),removedCategories:(Array.isArray(config.removedCategories)?config.removedCategories:[]).filter(id=>!ids.includes(id))};
+    preview.replaceChildren();const title=document.createElement('strong');title.textContent='復元予定：7項目・39カード（5555あり）';const list=document.createElement('ol');
+    for(const item of resolved){const li=document.createElement('li');li.textContent=item.label;const count=document.createElement('span');count.textContent=`${item.count}件`;li.append(count);list.append(li)}preview.append(title,list);
+    if(!auth?.systemPortalSessionToken){status.textContent='このChromeのログイン情報が見つかりません。';status.className='status error';return}
+    button.disabled=false;
+    button.addEventListener('click',async()=>{
+      button.disabled=true;status.textContent='7項目構成を保存中…';status.className='status';
+      try{
+        const response=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveWorkspaceConfig',systemPortalSessionToken:auth.systemPortalSessionToken,sharedState:{schemaVersion:1,workspaceConfig:repaired,favorites:Array.isArray(favorites)?favorites:[]}}),redirect:'follow'});
+        const result=JSON.parse(await response.text());if(!response.ok||!result.success)throw new Error(result.error||'保存できませんでした。');
+        localStorage.setItem('stepWorkspaceConfigV1',JSON.stringify(repaired));status.textContent=`7項目・39カードを完全復旧しました（版 ${result.version}）`;status.className='status ok';button.textContent='完全復旧完了';
+      }catch(error){status.textContent=error.message||'保存できませんでした。';status.className='status error';button.disabled=false}
+    });
+  })();
+  </script>
+</body>
+</html>
