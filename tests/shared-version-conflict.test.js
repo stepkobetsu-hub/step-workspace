@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
-const app=fs.readFileSync(path.join(root,'app.v20260814-30.js'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.v20260814-31.js'),'utf8');
 
 test('共有保存は読み込んだ版番号を必ず送る',()=>{
   assert.match(app,/expectedVersion:state\.sharedVersion/);

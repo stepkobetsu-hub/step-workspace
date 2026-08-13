@@ -78,7 +78,7 @@
     const url=firstUrl(item);
     return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url,productionUrl:url,parentSystem:text(item.parentSystem),status:statusOf(item),favoriteEnabled:item.favorite!==false,recentEnabled:item.recent!==false,iconType:isGoogleSheetUrl(url)?'google-sheet':'category',categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
   }
-  function buildApps(items){const seenIds=new Set();const seenUrls=new Set();return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(app.status!=='active')return false;const key=urlKey(app.url);if(seenIds.has(app.id)||(key&&seenUrls.has(key)))return false;seenIds.add(app.id);if(key)seenUrls.add(key);return true})}
+  function buildApps(items,options={}){const seenIds=new Set();const seenUrls=new Set();const allowDuplicateUrls=options.allowDuplicateUrls===true;return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(app.status!=='active')return false;const key=urlKey(app.url);if(seenIds.has(app.id)||(!allowDuplicateUrls&&key&&seenUrls.has(key)))return false;seenIds.add(app.id);if(key)seenUrls.add(key);return true})}
   function plainMarkdown(value){return text(value).replace(/^\[([^\]]+)\]\([^\)]+\)$/,'$1').replace(/`/g,'')}
   function parseRegistryMarkdown(markdown){
     const lines=String(markdown||'').split(/\r?\n/);const start=lines.findIndex(line=>/^\|\s*正式名称\s*\|\s*状態\s*\|/.test(line));if(start<0)return [];
