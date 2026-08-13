@@ -23,3 +23,4 @@
 @media(max-width:800px){.category-sidebar{position:static}.category-workspace .category-sidebar .category-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:540px){.category-workspace .category-sidebar .category-tabs{grid-template-columns:1fr}}
 .category-search .category-search-wrap{height:38px;padding:0 9px}.category-search .category-search-wrap svg{width:16px;flex:none}.category-search .category-search-wrap input{height:auto;border:0;border-radius:0;padding:0;background:transparent;box-shadow:none;font-size:11px}.category-order-controls .category-drag-handle{cursor:grab;color:var(--accent);font-size:15px}.category-order-controls .category-drag-handle:active{cursor:grabbing}
+.app-card .sheet-app-icon{position:absolute;right:13px;bottom:13px;z-index:2;pointer-events:none}.app-card:has(.sheet-app-icon:not([hidden])) .open-label{padding-right:42px}
