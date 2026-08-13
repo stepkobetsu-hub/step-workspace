@@ -2,7 +2,7 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-2';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-3';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
@@ -74,13 +74,18 @@
     byId('appCount').textContent=`${state.apps.length}件のアプリ`;
     renderFavorites();renderRecent();renderCategories();renderSearch();
   }
+  function renderAppIcon(icon,app){
+    if(app.iconType!=='google-sheet'){icon.textContent=app.initial;return}
+    icon.classList.add('google-sheet-icon');
+    icon.innerHTML='<svg viewBox="0 0 24 24" role="img" aria-label="Google スプレッドシート"><path class="sheet-page" d="M6.5 2h7l4 4v16h-11a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path class="sheet-fold" d="M13.5 2v4h4"/><path class="sheet-grid" d="M8 10.5h6.5M8 14h6.5M8 17.5h6.5M10.2 10.5v7"/></svg>';
+  }
   function createCard(app){
     const card=byId('appCardTemplate').content.firstElementChild.cloneNode(true);
     card.dataset.appId=app.id;card.classList.add(app.categoryClass);
     const favorite=card.querySelector('.favorite-button');const active=state.favorites.includes(app.id);
     favorite.classList.toggle('is-favorite',active);favorite.querySelector('span').textContent=active?'★':'☆';favorite.setAttribute('aria-label',active?`${app.name}をお気に入りから外す`:`${app.name}をお気に入りに追加`);
     favorite.addEventListener('click',()=>toggleFavorite(app.id));
-    card.querySelector('.app-icon').textContent=app.initial;card.querySelector('.app-copy strong').textContent=app.name;card.querySelector('.app-copy small').textContent=app.description;
+    renderAppIcon(card.querySelector('.app-icon'),app);card.querySelector('.app-copy strong').textContent=app.name;card.querySelector('.app-copy small').textContent=app.description;
     const link=card.querySelector('.app-link');
     if(app.url){link.href=app.url;link.addEventListener('click',()=>recordRecent(app.id))}
     else{card.classList.add('is-unavailable');link.removeAttribute('href');link.setAttribute('aria-disabled','true');card.querySelector('.open-label').textContent='本番URL確認中'}

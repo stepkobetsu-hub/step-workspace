@@ -35,6 +35,7 @@
   function text(value){return String(value==null?'':value).trim()}
   function normalize(value){return text(value).toLowerCase().normalize('NFKC').replace(/[\s　]+/g,'')}
   function isUrl(value){try{const u=new URL(text(value));return u.protocol==='https:'||u.protocol==='http:'}catch(_){return false}}
+  function isGoogleSheetUrl(value){try{const u=new URL(text(value));return u.protocol==='https:'&&u.hostname==='docs.google.com'&&u.pathname.startsWith('/spreadsheets/')}catch(_){return false}}
   function firstUrl(item){for(const key of URL_FIELDS){const value=text(item[key]);if(isUrl(value))return value}return ''}
   function nameOf(item){return text(item['正式名称']||item['システム名']||item['名称']||item.name||'名称未設定')}
   function idOf(item){return text(item.ID||item.id)||normalize(nameOf(item)).replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff-]/g,'-')}
@@ -67,7 +68,8 @@
   }
   function toApp(item){
     const category=CATEGORIES.find(value=>value.id===categoryId(item))||CATEGORIES.at(-1);
-    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url:firstUrl(item),categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
+    const url=firstUrl(item);
+    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url,iconType:isGoogleSheetUrl(url)?'google-sheet':'category',categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
   }
   function buildApps(items){const seen=new Set();return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(seen.has(app.id))return false;seen.add(app.id);return true})}
   function plainMarkdown(value){return text(value).replace(/^\[([^\]]+)\]\([^\)]+\)$/,'$1').replace(/`/g,'')}
@@ -92,5 +94,5 @@
   function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
   function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書PDF/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}
   function groupByCategory(apps){return CATEGORIES.map(category=>({category,apps:apps.filter(app=>app.categoryId===category.id)})).filter(group=>group.apps.length)}
-  return {CATEGORIES,URL_FIELDS,normalize,isUrl,firstUrl,nameOf,idOf,categoryId,descriptionOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,filterApps,defaultFavoriteIds,groupByCategory};
+  return {CATEGORIES,URL_FIELDS,normalize,isUrl,isGoogleSheetUrl,firstUrl,nameOf,idOf,categoryId,descriptionOf,toApp,buildApps,plainMarkdown,parseRegistryMarkdown,mergeRegistrySources,filterApps,defaultFavoriteIds,groupByCategory};
 });
