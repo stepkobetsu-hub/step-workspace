@@ -13,6 +13,7 @@
   const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV1';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const REQUIRED_REFERRAL_APP={id:'referral-card-reader',displayName:'お友達紹介カード読み取り',description:'紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',parentSystem:'スタッフ用アプリ',keywords:['お友達紹介','紹介カード','AI読取','図書カード','初回学費','割引','済'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
 
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
   const byId=id=>document.getElementById(id);
@@ -99,21 +100,23 @@
     updateHistoryButtons();
   }
   const clone=value=>JSON.parse(JSON.stringify(value));
-  function ensureRequiredReferralApp(config){
+  function ensureRequiredApps(config){
     const value=Core.normalizeWorkspaceConfig(config);
     if(!value.categories.some(category=>category.id==='custom-management'))value.categories.splice(Math.min(3,value.categories.length),0,{id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4'});
-    value.customApps=value.customApps.filter(app=>app.id!==REQUIRED_REFERRAL_APP.id&&app.productionUrl!==REQUIRED_REFERRAL_APP.productionUrl);
-    value.customApps.push(Object.assign({},REQUIRED_REFERRAL_APP));
-    value.assignments[REQUIRED_REFERRAL_APP.id]='custom-management';
-    value.devices[REQUIRED_REFERRAL_APP.id]='both';
-    value.orders['custom-management']=Array.isArray(value.orders['custom-management'])?value.orders['custom-management'].filter(id=>id!==REQUIRED_REFERRAL_APP.id):[];
-    value.orders['custom-management'].push(REQUIRED_REFERRAL_APP.id);
-    value.archived=value.archived.filter(id=>id!==REQUIRED_REFERRAL_APP.id);
-    value.deleted=value.deleted.filter(id=>id!==REQUIRED_REFERRAL_APP.id);
+    [REQUIRED_REFERRAL_APP,REQUIRED_EXAM_TICKET_APP].forEach(app=>{
+      value.customApps=value.customApps.filter(item=>item.id!==app.id&&item.productionUrl!==app.productionUrl);
+      value.customApps.push(Object.assign({},app));
+      value.assignments[app.id]='custom-management';
+      value.devices[app.id]='both';
+      value.orders['custom-management']=Array.isArray(value.orders['custom-management'])?value.orders['custom-management'].filter(id=>id!==app.id):[];
+      value.orders['custom-management'].push(app.id);
+      value.archived=value.archived.filter(id=>id!==app.id);
+      value.deleted=value.deleted.filter(id=>id!==app.id);
+    });
     return value;
   }
   function rebuildApps(){
-    state.config=ensureRequiredReferralApp(state.config);
+    state.config=ensureRequiredApps(state.config);
     const custom=Core.buildApps(state.config.customApps,{allowDuplicateUrls:true});const catalog=state.config.replaceCatalog?[]:state.baseApps;const seen=new Set();state.allApps=[...custom,...catalog].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
   }
