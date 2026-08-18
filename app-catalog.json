@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-13",
+  "updatedAt": "2026-08-18",
   "apps": [
     {
       "id": "staff-meeting-memo",
@@ -9,7 +9,13 @@
       "category": "student",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/meeting_memo.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["面談", "電話", "相談", "メモ", "生徒履歴"],
+      "keywords": [
+        "面談",
+        "電話",
+        "相談",
+        "メモ",
+        "生徒履歴"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -21,7 +27,14 @@
       "category": "contact",
       "productionUrl": "https://stepkobetsu-hub.github.io/step-message-center/",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["配信", "連絡", "メール", "添付", "欠席", "送信履歴"],
+      "keywords": [
+        "配信",
+        "連絡",
+        "メール",
+        "添付",
+        "欠席",
+        "送信履歴"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -33,7 +46,14 @@
       "category": "billing",
       "productionUrl": "https://stepkobetsu-hub.github.io/invoice-pdf/",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["請求", "請求書", "領収書", "PDF", "メール送信", "入金"],
+      "keywords": [
+        "請求",
+        "請求書",
+        "領収書",
+        "PDF",
+        "メール送信",
+        "入金"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -45,7 +65,13 @@
       "category": "student",
       "productionUrl": "https://stepkobetsu-hub.github.io/student-QR/points_manager.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["ポイント", "付与", "使用", "履歴", "生徒"],
+      "keywords": [
+        "ポイント",
+        "付与",
+        "使用",
+        "履歴",
+        "生徒"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -57,7 +83,14 @@
       "category": "contact",
       "productionUrl": "https://stepkobetsu-hub.github.io/student-QR/student_qr_register.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["QR", "管理者QR登録", "生徒QR", "講師QR", "入退室", "出退くん"],
+      "keywords": [
+        "QR",
+        "管理者QR登録",
+        "生徒QR",
+        "講師QR",
+        "入退室",
+        "出退くん"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -69,7 +102,13 @@
       "category": "student",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/admin.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["成績", "通知表", "志望校", "生徒情報", "テスト"],
+      "keywords": [
+        "成績",
+        "通知表",
+        "志望校",
+        "生徒情報",
+        "テスト"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -81,7 +120,34 @@
       "category": "contact",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/entry_import.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["エントリーシート", "読取", "OCR", "入塾", "成績", "通知表"],
+      "keywords": [
+        "エントリーシート",
+        "読取",
+        "OCR",
+        "入塾",
+        "成績",
+        "通知表"
+      ],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
+    },
+    {
+      "id": "referral-card-reader",
+      "displayName": "お友達紹介カード読み取り",
+      "description": "紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存",
+      "category": "admin",
+      "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html",
+      "parentSystem": "スタッフ用アプリ",
+      "keywords": [
+        "お友達紹介",
+        "紹介カード",
+        "AI読取",
+        "図書カード",
+        "初回学費",
+        "割引",
+        "済"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -93,11 +159,19 @@
       "category": "contact",
       "productionUrl": "https://juku-card-system.onrender.com/",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["受付カード", "読取", "写真", "受付", "取り込み"],
+      "keywords": [
+        "受付カード",
+        "読取",
+        "写真",
+        "受付",
+        "取り込み"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active",
-      "replaces": ["受付カード読み取り"]
+      "replaces": [
+        "受付カード読み取り"
+      ]
     },
     {
       "id": "past-exam-upload",
@@ -106,7 +180,14 @@
       "category": "student",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/past_exam_upload.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["過去問", "アップロード", "PDF", "画像", "保管", "提出"],
+      "keywords": [
+        "過去問",
+        "アップロード",
+        "PDF",
+        "画像",
+        "保管",
+        "提出"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -118,7 +199,13 @@
       "category": "contact",
       "productionUrl": "https://stepkobetsu-hub.github.io/student-QR/delivery_failures.html?v=5ce2c765",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["不達", "メール", "送信停止", "配信再開", "入退室"],
+      "keywords": [
+        "不達",
+        "メール",
+        "送信停止",
+        "配信再開",
+        "入退室"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -130,7 +217,13 @@
       "category": "billing",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/billing_adjustment.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["料金", "特別調整", "割引", "加算", "請求"],
+      "keywords": [
+        "料金",
+        "特別調整",
+        "割引",
+        "加算",
+        "請求"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -142,7 +235,13 @@
       "category": "student",
       "productionUrl": "https://script.google.com/macros/s/AKfycbyB2DdfN6Xdz0mq0vDs37sqNxtbTz5Mh085zdDB5HvVFIfOK1JjfbVCC6oQZ9j0NCeA/exec",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["時間割", "マスタ", "授業", "入力", "更新"],
+      "keywords": [
+        "時間割",
+        "マスタ",
+        "授業",
+        "入力",
+        "更新"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -154,7 +253,14 @@
       "category": "teacher",
       "productionUrl": "https://script.google.com/macros/s/AKfycbwYzQ1tM1mWRLG6jOxBirAuSUCMb41bkDsn5vviGUjDPmFKjJNCl5jdz7NFa4L45J8yvQ/exec",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["ゆうちょ", "BIZ", "従業員", "講師マスター", "CSV", "給与"],
+      "keywords": [
+        "ゆうちょ",
+        "BIZ",
+        "従業員",
+        "講師マスター",
+        "CSV",
+        "給与"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -166,7 +272,13 @@
       "category": "teacher",
       "productionUrl": "https://stepkobetsu-hub.github.io/teacher-portal/?view=attendance",
       "parentSystem": "講師ポータル",
-      "keywords": ["授業報告", "授業", "コマ数", "勤務場所", "講師"],
+      "keywords": [
+        "授業報告",
+        "授業",
+        "コマ数",
+        "勤務場所",
+        "講師"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -178,7 +290,13 @@
       "category": "teacher",
       "productionUrl": "https://stepkobetsu-hub.github.io/teacher-portal/?view=qr",
       "parentSystem": "講師ポータル",
-      "keywords": ["出退くん", "QR", "入退室", "講師", "出勤"],
+      "keywords": [
+        "出退くん",
+        "QR",
+        "入退室",
+        "講師",
+        "出勤"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -190,7 +308,14 @@
       "category": "teacher",
       "productionUrl": "https://stepkobetsu-hub.github.io/teacher_schedule/teacher_app.html",
       "parentSystem": "講師ポータル",
-      "keywords": ["夏休み", "夏期講習", "出勤", "可能日", "予定", "講師"],
+      "keywords": [
+        "夏休み",
+        "夏期講習",
+        "出勤",
+        "可能日",
+        "予定",
+        "講師"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -202,7 +327,13 @@
       "category": "teacher",
       "productionUrl": "https://stepkobetsu-hub.github.io/teacher-portal/salary.html",
       "parentSystem": "講師ポータル",
-      "keywords": ["給与", "給与明細", "給料", "講師", "支給"],
+      "keywords": [
+        "給与",
+        "給与明細",
+        "給料",
+        "講師",
+        "支給"
+      ],
       "favorite": true,
       "recent": true,
       "status": "active"
@@ -214,7 +345,10 @@
       "category": "student",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/entry_followup_form.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["入塾", "フォロー"],
+      "keywords": [
+        "入塾",
+        "フォロー"
+      ],
       "favorite": false,
       "recent": false,
       "status": "hidden"
@@ -226,7 +360,11 @@
       "category": "contact",
       "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/archive_delivery_failures.html",
       "parentSystem": "スタッフ用アプリ",
-      "keywords": ["不達", "旧版", "archive"],
+      "keywords": [
+        "不達",
+        "旧版",
+        "archive"
+      ],
       "favorite": false,
       "recent": false,
       "status": "legacy"
