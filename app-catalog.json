@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-18",
+  "updatedAt": "2026-08-19",
   "apps": [
     {
       "id": "staff-meeting-memo",
@@ -147,6 +147,27 @@
         "初回学費",
         "割引",
         "済"
+      ],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
+    },
+    {
+      "id": "aichi-exam-ticket",
+      "displayName": "全県模試受験票作成",
+      "description": "年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷",
+      "category": "admin",
+      "productionUrl": "https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html",
+      "parentSystem": "STEP配信システム",
+      "keywords": [
+        "全県模試",
+        "愛知全県模試",
+        "受験票",
+        "受験番号",
+        "模試",
+        "印刷",
+        "時間割",
+        "年度"
       ],
       "favorite": true,
       "recent": true,
