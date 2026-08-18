@@ -13,7 +13,7 @@
   <main>
     <h1>貼り付け一覧から作り直す</h1>
     <p>先ほど確認した7項目・39カードを新しい配置として作成します。残っている同名カードのURLと、確認できた正式URLは自動で引き継ぎます。</p>
-    <section class="preview"><strong>作成内容：7項目・39カード</strong><ol id="categoryList"></ol></section>
+    <section class="preview"><strong>作成内容：7項目・40カード</strong><ol id="categoryList"></ol></section>
     <p class="warning" id="missingSummary">リンクを確認しています…</p>
     <button id="rebuildButton" type="button" disabled>この内容で作り直して全パソコンへ保存</button>
     <p class="status" id="status" aria-live="polite"></p>
@@ -31,7 +31,7 @@
       {id:'student',label:'生徒・授業',icon:'user',color:'#DD8700',count:7},
       {id:'custom-time',label:'時間割',icon:'clock',color:'#7C5C20',count:4},
       {id:'contact',label:'連絡・受付',icon:'chat',color:'#276EE4',count:8},
-      {id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4',count:4},
+      {id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4',count:5},
       {id:'billing',label:'請求・会計',icon:'wallet',color:'#1D9550',count:4},
       {id:'teacher',label:'講師・給与',icon:'teacher',color:'#D54883',count:7},
       {id:'custom-portal',label:'ポータル・ホーム',icon:'grid',color:'#276EE4',count:5}
@@ -52,6 +52,7 @@
       '時間割マスタ入力':'https://script.google.com/macros/s/AKfycbyB2DdfN6Xdz0mq0vDs37sqNxtbTz5Mh085zdDB5HvVFIfOK1JjfbVCC6oQZ9j0NCeA/exec',
       '受付カード読取':'https://juku-card-system.onrender.com/',
       'エントリーシート読取':'https://stepkobetsu-hub.github.io/seiseki-kanri/entry_import.html',
+      'お友達紹介カード読み取り':'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',
       '請求管理システムV3.1（学費計算・請求データ作成）':'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIktpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec',
       '請求書作成・送信・入金管理':'https://stepkobetsu-hub.github.io/invoice-pdf/',
       '料金特別調整':'https://stepkobetsu-hub.github.io/seiseki-kanri/billing_adjustment.html',
@@ -70,7 +71,7 @@
       ['student','5555','dd','both'],['student','成績管理','成績・通知表・志望校・生徒情報の確認と管理','both'],['student','学習進捗管理','生徒の学習状況と進捗を確認','both'],['student','面談メモ','面談・電話・相談内容の登録と生徒別履歴の確認','both'],['student','過去問保管DB','過去問題の登録・検索・閲覧','both'],['student','過去問アップロード','過去問ファイルをアップロードして保管','both'],['student','ポイント設定','生徒ポイントの確認・付与・使用・履歴管理','both'],
       ['custom-time','時間割','通常時間割','desktop'],['custom-time','2026夏休み時間割(神領）','夏休み講習の時間割','both'],['custom-time','夏休み講習時間割（個人用→全体時間割作成）','生徒ごとの個人時間割を作成し、ボタン一つで全体時間割へ自動集約する、休み講習の時間割作成システム','both'],['custom-time','夏休み講習時間割（個人用→全体時間割作成）','個人時間割をつくると全体時間割にまとめてくれる','both'],
       ['contact','STEP配信システム','個別送信・添付・送信履歴・欠席確認','both'],['contact','不達メール管理','入退室メールの不達・送信停止・配信再開を管理','both'],['contact','出退くんQR作成・読取','入退室QRの作成と読み取り','mobile'],['contact','生徒・講師QR／入退室管理','管理者QR登録と生徒・講師のQR作成・確認','mobile'],['contact','お問い合わせ管理','お問い合わせ内容の確認と対応','both'],['contact','欠席・遅刻連絡','保護者・生徒からの遅刻・欠席・早退連絡を受け付け、Google Sheetへ保存し、管理者メール・LINE通知を行う','both'],['contact','LINE用お知らせページ','LINE用お知らせページ（HP）','both'],['contact','受付カード','受付カードのスプレッドシートです。','both'],
-      ['custom-management','時間割マスタ入力','生徒マスタの中の「時間割マスタ」を直接入力・更新：請求と直結するので正確に','both'],['custom-management','生徒マスタ','生徒情報の確認と管理','desktop'],['custom-management','受付カード読取','受付カードの写真を読み取り、必要な内容を取り込む','mobile'],['custom-management','エントリーシート読取','入塾書類・成績・通知表・志望校を読み取って登録','mobile'],
+      ['custom-management','時間割マスタ入力','生徒マスタの中の「時間割マスタ」を直接入力・更新：請求と直結するので正確に','both'],['custom-management','生徒マスタ','生徒情報の確認と管理','desktop'],['custom-management','受付カード読取','受付カードの写真を読み取り、必要な内容を取り込む','mobile'],['custom-management','エントリーシート読取','入塾書類・成績・通知表・志望校を読み取って登録','mobile'],['custom-management','お友達紹介カード読み取り','紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存','both'],
       ['billing','請求管理システムV3.1（学費計算・請求データ作成）','学費計算と請求データの作成・確認','both'],['billing','請求書作成・送信・入金管理','請求書の作成・確認・メール送信・入金管理','both'],['billing','料金特別調整','イレギュラーな割引・加算を登録','both'],['billing','請求書202608_請求 NEW','重要だが、通常は直接開かない。請求管理アプリの裏側で使用する基幹Google Sheet','desktop'],
       ['teacher','夏休み出勤管理','講師からの出勤連絡を集約し、時間割に講師を一括入力ができる','both'],['teacher','ゆうちょBIZ従業員マスタ','講師マスターからゆうちょBIZ登録用CSVを作成','both'],['teacher','講師用：授業コマ数報告','授業後の担当授業・コマ数・勤務場所を報告','both'],['teacher','講師用 出退くんQR','講師本人の入退室用QRコードを表示','mobile'],['teacher','夏休み出勤可能日登録','夏期講習の出勤可能日を登録','both'],['teacher','給与明細','講師本人の給与明細を表示','both'],['teacher','講師マスター／給与明細','講師情報と給与明細の管理','both'],
       ['custom-portal','STEP塾生アプリ（step-hub）','塾生向け機能をまとめた共通入口','both'],['custom-portal','講師ポータル','講師向け情報と業務メニュー','both'],['custom-portal','STEPシステム資産管理台帳','STEPの管理機能をまとめた入口','both'],['custom-portal','STEP業務ホーム','「STEP業務ホーム」とは、このページのことです。','both'],['custom-portal','スタッフ用アプリ','業務アプリを開く','both']
