@@ -14,6 +14,7 @@
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const REQUIRED_REFERRAL_APP={id:'referral-card-reader',displayName:'お友達紹介カード読み取り',description:'紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',parentSystem:'スタッフ用アプリ',keywords:['お友達紹介','紹介カード','AI読取','図書カード','初回学費','割引','済'],favorite:true,recent:true,status:'active'};
   const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_VCODE_APP={id:'vcode-id-pass-print',displayName:'V-code ID＆Pass 印刷',description:'対象月を選び、V-code電子テキストのID・パスワードとQR入りA4掲示物を作成してPDF保存・印刷',category:'custom-management',productionUrl:'https://vcode-poster-maker.mintcocoajasmine.chatgpt.site',parentSystem:'V-code掲示物作成',keywords:['V-code','ID','Pass','パスワード','QR','掲示物','PDF','印刷'],favorite:true,recent:true,status:'active'};
 
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
   const byId=id=>document.getElementById(id);
@@ -103,7 +104,7 @@
   function ensureRequiredApps(config){
     const value=Core.normalizeWorkspaceConfig(config);
     if(!value.categories.some(category=>category.id==='custom-management'))value.categories.splice(Math.min(3,value.categories.length),0,{id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4'});
-    [REQUIRED_REFERRAL_APP,REQUIRED_EXAM_TICKET_APP].forEach(app=>{
+    [REQUIRED_REFERRAL_APP,REQUIRED_EXAM_TICKET_APP,REQUIRED_VCODE_APP].forEach(app=>{
       value.customApps=value.customApps.filter(item=>item.id!==app.id&&item.productionUrl!==app.productionUrl);
       value.customApps.push(Object.assign({},app));
       value.assignments[app.id]='custom-management';
