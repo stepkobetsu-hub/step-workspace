@@ -1,7 +1,27 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-19",
+  "updatedAt": "2026-08-20",
   "apps": [
+    {
+      "id": "teacher-payroll-processing",
+      "displayName": "講師給与処理",
+      "description": "出退くん勤怠取込から完成版・コマ数・月別給与・ゆうちょBIZ振込CSVまでを順番に処理",
+      "category": "admin",
+      "productionUrl": "https://script.google.com/macros/s/AKfycbxCpmgFEPaEl7EykKO1MrXDCQqg_-ww8AgfVLa6WSpD6sYuUj4pG07DwI0KizIUI7Z9/exec?app=payroll",
+      "parentSystem": "講師マスター／給与明細",
+      "keywords": [
+        "講師給与",
+        "給与明細",
+        "出退くん",
+        "勤怠",
+        "コマ数",
+        "ゆうちょBIZ",
+        "振込"
+      ],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
+    },
     {
       "id": "staff-meeting-memo",
       "displayName": "面談メモ",
