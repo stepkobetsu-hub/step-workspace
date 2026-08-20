@@ -25,6 +25,26 @@
       "status": "active"
     },
     {
+      "id": "teacher-name-badge-print",
+      "displayName": "講師名札印刷",
+      "description": "講師を名前・よみ・ローマ字・コードで検索し、QR入り二つ折り名札をA4一枚で印刷",
+      "category": "teacher",
+      "productionUrl": "https://step-name-badge.mintcocoajasmine.chatgpt.site",
+      "parentSystem": "講師マスター／給与明細",
+      "keywords": [
+        "講師",
+        "名札",
+        "QR",
+        "印刷",
+        "苗字",
+        "よみがな",
+        "給与明細"
+      ],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
+    },
+    {
       "id": "staff-meeting-memo",
       "displayName": "面談メモ",
       "description": "面談・電話・相談内容の登録と生徒別履歴の確認",
