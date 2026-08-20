@@ -4,19 +4,21 @@
   "apps": [
     {
       "id": "teacher-payroll-processing",
-      "displayName": "講師給与処理",
-      "description": "出退くん勤怠取込から完成版・コマ数・月別給与・ゆうちょBIZ振込CSVまでを順番に処理",
-      "category": "admin",
+      "displayName": "講師給与計算・出力アプリ",
+      "description": "年・月を選び、出退くん勤怠取込から完成版・コマ数・月別給与・給与明細確認・ゆうちょBIZ振込CSVまで順番に処理",
+      "category": "teacher",
       "productionUrl": "https://script.google.com/macros/s/AKfycbxCpmgFEPaEl7EykKO1MrXDCQqg_-ww8AgfVLa6WSpD6sYuUj4pG07DwI0KizIUI7Z9/exec?app=payroll",
       "parentSystem": "講師マスター／給与明細",
       "keywords": [
         "講師給与",
         "給与明細",
+        "給与計算",
         "出退くん",
         "勤怠",
+        "完成版",
         "コマ数",
         "ゆうちょBIZ",
-        "振込"
+        "振込CSV"
       ],
       "favorite": true,
       "recent": true,
