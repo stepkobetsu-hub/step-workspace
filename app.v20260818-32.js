@@ -3,7 +3,7 @@
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
   const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-3';
-  const APP_CATALOG='app-catalog.json?v=20260813-1';
+  const APP_CATALOG='app-catalog.json?v=20260820-payroll-card-1';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
@@ -15,6 +15,7 @@
   const REQUIRED_REFERRAL_APP={id:'referral-card-reader',displayName:'お友達紹介カード読み取り',description:'紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',parentSystem:'スタッフ用アプリ',keywords:['お友達紹介','紹介カード','AI読取','図書カード','初回学費','割引','済'],favorite:true,recent:true,status:'active'};
   const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
   const REQUIRED_VCODE_APP={id:'vcode-id-pass-print',displayName:'V-code ID＆Pass 印刷',description:'対象月を選び、V-code電子テキストのID・パスワードとQR入りA4掲示物を作成してPDF保存・印刷',category:'custom-management',productionUrl:'https://vcode-poster-maker.mintcocoajasmine.chatgpt.site',parentSystem:'V-code掲示物作成',keywords:['V-code','ID','Pass','パスワード','QR','掲示物','PDF','印刷'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_PAYROLL_APP={id:'teacher-payroll-processing',displayName:'講師給与計算・出力アプリ',description:'年・月を選び、出退くん勤怠取込から完成版・コマ数・月別給与・給与明細確認・ゆうちょBIZ振込CSVまで順番に処理',category:'teacher',productionUrl:'https://script.google.com/macros/s/AKfycbxCpmgFEPaEl7EykKO1MrXDCQqg_-ww8AgfVLa6WSpD6sYuUj4pG07DwI0KizIUI7Z9/exec?app=payroll',parentSystem:'講師マスター／給与明細',keywords:['講師給与','給与明細','給与計算','出退くん','勤怠','完成版','コマ数','ゆうちょBIZ','振込CSV'],favorite:true,recent:true,status:'active'};
 
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
   const byId=id=>document.getElementById(id);
@@ -114,6 +115,15 @@
       value.archived=value.archived.filter(id=>id!==app.id);
       value.deleted=value.deleted.filter(id=>id!==app.id);
     });
+    if(!value.categories.some(category=>category.id==='teacher'))value.categories.push({id:'teacher',label:'講師・給与',icon:'teacher',color:'#D54883'});
+    value.customApps=value.customApps.filter(item=>item.id!==REQUIRED_PAYROLL_APP.id&&item.productionUrl!==REQUIRED_PAYROLL_APP.productionUrl);
+    value.customApps.push(Object.assign({},REQUIRED_PAYROLL_APP));
+    value.assignments[REQUIRED_PAYROLL_APP.id]='teacher';
+    value.devices[REQUIRED_PAYROLL_APP.id]='both';
+    value.orders.teacher=Array.isArray(value.orders.teacher)?value.orders.teacher.filter(id=>id!==REQUIRED_PAYROLL_APP.id):[];
+    value.orders.teacher.unshift(REQUIRED_PAYROLL_APP.id);
+    value.archived=value.archived.filter(id=>id!==REQUIRED_PAYROLL_APP.id);
+    value.deleted=value.deleted.filter(id=>id!==REQUIRED_PAYROLL_APP.id);
     return value;
   }
   function rebuildApps(){
