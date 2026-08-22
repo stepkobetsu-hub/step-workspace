@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-20",
+  "updatedAt": "2026-08-22",
   "apps": [
     {
       "id": "teacher-payroll-processing",
@@ -431,6 +431,25 @@
       "favorite": false,
       "recent": false,
       "status": "legacy"
+    },
+    {
+      "id": "learning-progress",
+      "displayName": "ステップ＆ゴール進捗管理",
+      "description": "ステップ＆ゴール教材の学習進捗・目標範囲・宿題チェック",
+      "category": "student",
+      "productionUrl": "https://step-progress-api.stepkobetsu.workers.dev/",
+      "parentSystem": "ステップ＆ゴール進捗管理",
+      "keywords": [
+        "ステップ",
+        "ゴール",
+        "学習進捗",
+        "目標範囲",
+        "宿題",
+        "D1"
+      ],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
     }
   ]
 }

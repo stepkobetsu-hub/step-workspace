@@ -2,15 +2,15 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-3';
-  const APP_CATALOG='app-catalog.json?v=20260813-1';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260822-progress-v3-1';
+  const APP_CATALOG='app-catalog.json?v=20260822-progress-v3-1';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
-  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV1';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV2';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
   const byId=id=>document.getElementById(id);
@@ -53,6 +53,7 @@
   }
   function showRegistrySource(source){
     if(!Array.isArray(source)||!source.length)return false;
+    source=source.map(item=>{const name=String(item?.displayName||item?.['正式名称']||item?.['システム名']||'');const id=String(item?.ID||item?.id||'');if(id==='learning-progress'||name.includes('ステップ＆ゴール進捗管理')||name.includes('学習進捗管理'))return Object.assign({},item,{ID:item.ID||'learning-progress',id:item.id||'learning-progress',displayName:'ステップ＆ゴール進捗管理','正式名称':'ステップ＆ゴール進捗管理','システム名':'ステップ＆ゴール進捗管理',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/','利用者向けURL':'https://step-progress-api.stepkobetsu.workers.dev/','状態':'V3本番稼働中（D1直保存・旧進捗復元済み）'});return item});
     state.auth=readAuth();state.baseApps=Core.buildApps(source);state.config=Core.normalizeWorkspaceConfig(readJson(WORKSPACE_CONFIG_KEY,Core.defaultWorkspaceConfig()));rebuildApps();
     if(!state.apps.length)return false;
     state.favorites=readJson(FAVORITES_KEY,null);

@@ -2,15 +2,15 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260813-3';
-  const APP_CATALOG='app-catalog.json?v=20260820-teacher-badge-1';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260822-progress-v3-1';
+  const APP_CATALOG='app-catalog.json?v=20260822-progress-v3-1';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
-  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV1';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV2';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const REQUIRED_REFERRAL_APP={id:'referral-card-reader',displayName:'お友達紹介カード読み取り',description:'紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',parentSystem:'スタッフ用アプリ',keywords:['お友達紹介','紹介カード','AI読取','図書カード','初回学費','割引','済'],favorite:true,recent:true,status:'active'};
   const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
@@ -59,6 +59,7 @@
   }
   function showRegistrySource(source){
     if(!Array.isArray(source)||!source.length)return false;
+    source=source.map(item=>{const name=String(item?.displayName||item?.['正式名称']||item?.['システム名']||'');const id=String(item?.ID||item?.id||'');if(id==='learning-progress'||name.includes('ステップ＆ゴール進捗管理')||name.includes('学習進捗管理'))return Object.assign({},item,{ID:item.ID||'learning-progress',id:item.id||'learning-progress',displayName:'ステップ＆ゴール進捗管理','正式名称':'ステップ＆ゴール進捗管理','システム名':'ステップ＆ゴール進捗管理',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/','利用者向けURL':'https://step-progress-api.stepkobetsu.workers.dev/','状態':'V3本番稼働中（D1直保存・旧進捗復元済み）'});return item});
     state.auth=readAuth();state.baseApps=Core.buildApps(source);state.config=Core.normalizeWorkspaceConfig(readJson(WORKSPACE_CONFIG_KEY,Core.defaultWorkspaceConfig()));rebuildApps();
     if(!state.apps.length)return false;
     state.favorites=readJson(FAVORITES_KEY,null);
@@ -105,6 +106,8 @@
   const clone=value=>JSON.parse(JSON.stringify(value));
   function ensureRequiredApps(config){
     const value=Core.normalizeWorkspaceConfig(config);
+    value.customApps=value.customApps.map(app=>app.id==='learning-progress'?Object.assign({},app,{displayName:'ステップ＆ゴール進捗管理',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/'}):app);
+    if(value.cardOverrides?.['learning-progress']?.url)delete value.cardOverrides['learning-progress'].url;
     if(!value.categories.some(category=>category.id==='custom-management'))value.categories.splice(Math.min(3,value.categories.length),0,{id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4'});
     [REQUIRED_REFERRAL_APP,REQUIRED_EXAM_TICKET_APP,REQUIRED_VCODE_APP].forEach(app=>{
       value.customApps=value.customApps.filter(item=>item.id!==app.id&&item.productionUrl!==app.productionUrl);
