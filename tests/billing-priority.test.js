@@ -11,6 +11,7 @@ test('料金特別調整を指定URLで請求・会計の先頭へ固定する',
   const item=catalog.apps.find(value=>value.id==='billing-special-adjustment');
   assert.equal(item.productionUrl,'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIkpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec');
   assert.match(app,/value\.orders\.billing\.unshift\(REQUIRED_BILLING_ADJUSTMENT_APP\.id\)/);
+  assert.match(app,/value\.customApps\.unshift\(Object\.assign\(\{\},REQUIRED_BILLING_ADJUSTMENT_APP\)\)/);
   assert.match(app,/state\.favorites=\[REQUIRED_BILLING_ADJUSTMENT_APP\.id,/);
   assert.match(app,/isBillingAdjustment&&billingAdjustmentAdded/);
 });
