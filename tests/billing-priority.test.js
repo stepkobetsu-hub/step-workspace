@@ -14,4 +14,6 @@ test('料金特別調整を指定URLで請求・会計の先頭へ固定する',
   assert.match(app,/value\.customApps\.unshift\(Object\.assign\(\{\},REQUIRED_BILLING_ADJUSTMENT_APP\)\)/);
   assert.match(app,/state\.favorites=\[REQUIRED_BILLING_ADJUSTMENT_APP\.id,/);
   assert.match(app,/isBillingAdjustment&&billingAdjustmentAdded/);
+  assert.match(app,/cardUrl\.textContent=app\.url/);
+  assert.match(fs.readFileSync(path.join(root,'index.html'),'utf8'),/class="card-url" hidden/);
 });

@@ -226,7 +226,7 @@
       card.addEventListener('dragleave',event=>{if(!card.contains(event.relatedTarget))card.classList.remove('is-drop-before','is-drop-after')});
       card.addEventListener('drop',event=>{event.preventDefault();event.stopPropagation();const dragged=event.dataTransfer.getData('application/x-step-app')||event.dataTransfer.getData('text/plain');const after=card.classList.contains('is-drop-after');card.classList.remove('is-drop-before','is-drop-after');moveAppRelative(dragged,app.id,after)});
     }
-    renderAppIcon(card.querySelector('.app-icons'),app);card.querySelector('.app-copy strong').textContent=app.name;const description=card.querySelector('.app-copy small');description.textContent=app.description;description.title=app.description;card.querySelector('.app-category-tag').textContent=app.categoryLabel;
+    renderAppIcon(card.querySelector('.app-icons'),app);card.querySelector('.app-copy strong').textContent=app.name;const description=card.querySelector('.app-copy small');description.textContent=app.description;description.title=app.description;const cardUrl=card.querySelector('.card-url');if(app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id){cardUrl.hidden=false;cardUrl.textContent=app.url;cardUrl.title=app.url}card.querySelector('.app-category-tag').textContent=app.categoryLabel;
     const link=card.querySelector('.app-link');
     if(app.url){link.href=app.url;link.target='_blank';link.rel='noopener noreferrer';if(app.recentEnabled)link.addEventListener('click',()=>recordRecent(app.id))}
     else{card.classList.add('is-unavailable');link.removeAttribute('href');link.setAttribute('aria-disabled','true');card.querySelector('.open-label').textContent='本番URL確認中'}
