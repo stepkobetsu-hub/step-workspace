@@ -12,7 +12,7 @@
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
   const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV2';
   const ALLOWED_PERMISSIONS=['2','3','4'];
-  const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
+  const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
   const byId=id=>document.getElementById(id);
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
   const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}};
@@ -102,11 +102,11 @@
     const custom=Core.buildApps(state.config.customApps);const seen=new Set();state.allApps=[...custom,...state.baseApps].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
   }
-  function sharedPayload(){return {schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]}}
+  function sharedPayload(){return Object.assign({},clone(state.sharedEnvelope||{}),{schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]})}
   function setSyncStatus(message,status){const root=byId('syncStatus');if(!root)return;root.textContent=message;root.dataset.status=status||''}
   function applySharedPayload(payload,version){
     if(!payload?.workspaceConfig)return false;
-    state.sharedApplying=true;state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
+    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
     if(Array.isArray(payload.favorites)){state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));writeJson(FAVORITES_KEY,state.favorites)}
     state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
   }
