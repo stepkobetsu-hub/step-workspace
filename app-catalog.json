@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-22",
+  "updatedAt": "2026-09-02",
   "apps": [
     {
       "id": "teacher-payroll-processing",
@@ -446,6 +446,25 @@
         "目標範囲",
         "宿題",
         "D1"
+      ],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
+    },
+    {
+      "id": "foresta-progress-v2",
+      "displayName": "フォレスタ進捗管理",
+      "description": "学校授業の先取りを行う通常授業用の進捗・宿題・テスト範囲管理",
+      "category": "student",
+      "productionUrl": "https://stepkobetsu-hub.github.io/foresta-progress-v2/",
+      "parentSystem": "フォレスタ進捗管理",
+      "keywords": [
+        "フォレスタ",
+        "進捗",
+        "学校進度",
+        "宿題",
+        "テスト範囲",
+        "Supabase"
       ],
       "favorite": true,
       "recent": true,
