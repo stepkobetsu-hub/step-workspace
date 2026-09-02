@@ -161,7 +161,7 @@
   }
   function rebuildApps(){
     state.config=ensureRequiredApps(state.config);
-    const custom=Core.buildApps(state.config.customApps,{allowDuplicateUrls:true});const catalog=state.config.replaceCatalog?[]:state.baseApps;const seen=new Set();state.allApps=[...custom,...catalog].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
+    const custom=Core.buildApps(state.config.customApps,{allowDuplicateUrls:true});const catalog=state.config.replaceCatalog?[]:state.baseApps;const seen=new Set();let billingAdjustmentAdded=false;state.allApps=[...custom,...catalog].filter(app=>{const isBillingAdjustment=app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id||/料金特別調整/.test(app.name);if(seen.has(app.id)||state.config.deleted.includes(app.id)||(isBillingAdjustment&&billingAdjustmentAdded))return false;seen.add(app.id);if(isBillingAdjustment)billingAdjustmentAdded=true;return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
   }
   function sharedPayload(){return {schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]}}
