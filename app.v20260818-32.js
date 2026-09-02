@@ -2,8 +2,8 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260822-progress-v3-1';
-  const APP_CATALOG='app-catalog.json?v=20260902-invoice-cloudflare-1';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260902-app-links-1';
+  const APP_CATALOG='app-catalog.json?v=20260902-app-links-1';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
@@ -16,6 +16,8 @@
   const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
   const REQUIRED_VCODE_APP={id:'vcode-id-pass-print',displayName:'V-code ID＆Pass 印刷',description:'対象月を選び、V-code電子テキストのID・パスワードとQR入りA4掲示物を作成してPDF保存・印刷',category:'custom-management',productionUrl:'https://vcode-poster-maker.mintcocoajasmine.chatgpt.site',parentSystem:'V-code掲示物作成',keywords:['V-code','ID','Pass','パスワード','QR','掲示物','PDF','印刷'],favorite:true,recent:true,status:'active'};
   const REQUIRED_PAYROLL_APP={id:'teacher-payroll-processing',displayName:'講師給与計算・出力アプリ',description:'年・月を選び、出退くん勤怠取込から完成版・コマ数・月別給与・給与明細確認・ゆうちょBIZ振込CSVまで順番に処理',category:'teacher',productionUrl:'https://script.google.com/macros/s/AKfycbxCpmgFEPaEl7EykKO1MrXDCQqg_-ww8AgfVLa6WSpD6sYuUj4pG07DwI0KizIUI7Z9/exec?app=payroll',parentSystem:'講師マスター／給与明細',keywords:['講師給与','給与明細','給与計算','出退くん','勤怠','完成版','コマ数','ゆうちょBIZ','振込CSV'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_STEP_GOAL_APP={id:'learning-progress',displayName:'ステップ＆ゴール進捗管理',description:'ステップ＆ゴール教材の学習進捗・目標範囲・宿題チェック',category:'student',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/',parentSystem:'ステップ＆ゴール進捗管理',keywords:['ステップ','ゴール','学習進捗','目標範囲','宿題','D1','Cloudflare'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_FORESTA_APP={id:'foresta-progress-v2',displayName:'フォレスタ進捗管理',description:'学校授業の先取りを行う通常授業用の進捗・宿題・テスト範囲管理',category:'student',productionUrl:'https://stepkobetsu-hub.github.io/foresta-progress-v2/',parentSystem:'フォレスタ進捗管理',keywords:['フォレスタ','進捗','学校進度','宿題','テスト範囲','Supabase'],favorite:true,recent:true,status:'active'};
   const REQUIRED_TEACHER_BADGE_APP={id:'teacher-name-badge-print',displayName:'講師名札印刷',description:'講師を名前・よみ・ローマ字・コードで検索し、QR入り二つ折り名札をA4一枚で印刷',category:'teacher',productionUrl:'https://step-name-badge.mintcocoajasmine.chatgpt.site',parentSystem:'講師マスター／給与明細',keywords:['講師','名札','QR','印刷','苗字','よみがな','給与明細'],favorite:true,recent:true,status:'active'};
 
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
@@ -59,7 +61,7 @@
   }
   function showRegistrySource(source){
     if(!Array.isArray(source)||!source.length)return false;
-    source=source.map(item=>{const name=String(item?.displayName||item?.['正式名称']||item?.['システム名']||'');const id=String(item?.ID||item?.id||'');if(id==='learning-progress'||name.includes('ステップ＆ゴール進捗管理')||name.includes('学習進捗管理'))return Object.assign({},item,{ID:item.ID||'learning-progress',id:item.id||'learning-progress',displayName:'ステップ＆ゴール進捗管理','正式名称':'ステップ＆ゴール進捗管理','システム名':'ステップ＆ゴール進捗管理',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/','利用者向けURL':'https://step-progress-api.stepkobetsu.workers.dev/','状態':'V3本番稼働中（D1直保存・旧進捗復元済み）'});return item});
+    source=source.map(item=>{const name=String(item?.displayName||item?.['正式名称']||item?.['システム名']||'');const id=String(item?.ID||item?.id||'');if(id==='teacher-payroll-processing'||name==='講師給与計算・出力アプリ')return Object.assign({},item,REQUIRED_PAYROLL_APP,{ID:'teacher-payroll-processing',id:'teacher-payroll-processing',利用者向けURL:REQUIRED_PAYROLL_APP.productionUrl});if(id==='learning-progress'||name.includes('ステップ＆ゴール進捗管理')||name.includes('学習進捗管理'))return Object.assign({},item,REQUIRED_STEP_GOAL_APP,{ID:'learning-progress',id:'learning-progress',正式名称:'ステップ＆ゴール進捗管理',システム名:'ステップ＆ゴール進捗管理',利用者向けURL:REQUIRED_STEP_GOAL_APP.productionUrl,状態:'V3本番稼働中（D1直保存・旧進捗復元済み）'});if(id==='foresta-progress-v2'||name==='フォレスタ進捗管理')return Object.assign({},item,REQUIRED_FORESTA_APP,{ID:'foresta-progress-v2',id:'foresta-progress-v2',正式名称:'フォレスタ進捗管理',システム名:'フォレスタ進捗管理',利用者向けURL:REQUIRED_FORESTA_APP.productionUrl,状態:'V3本番稼働中（Supabase接続版）'});return item});
     state.auth=readAuth();state.baseApps=Core.buildApps(source);state.config=Core.normalizeWorkspaceConfig(readJson(WORKSPACE_CONFIG_KEY,Core.defaultWorkspaceConfig()));rebuildApps();
     if(!state.apps.length)return false;
     state.favorites=readJson(FAVORITES_KEY,null);
@@ -106,8 +108,17 @@
   const clone=value=>JSON.parse(JSON.stringify(value));
   function ensureRequiredApps(config){
     const value=Core.normalizeWorkspaceConfig(config);
-    value.customApps=value.customApps.map(app=>app.id==='learning-progress'?Object.assign({},app,{displayName:'ステップ＆ゴール進捗管理',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/'}):app);
-    if(value.cardOverrides?.['learning-progress']?.url)delete value.cardOverrides['learning-progress'].url;
+    const canonicalApps=[REQUIRED_PAYROLL_APP,REQUIRED_STEP_GOAL_APP,REQUIRED_FORESTA_APP];
+    value.customApps=value.customApps.map(app=>{const canonical=canonicalApps.find(item=>item.id===app.id);return canonical?Object.assign({},app,canonical):app});
+    canonicalApps.forEach(app=>{if(value.cardOverrides?.[app.id]?.url)delete value.cardOverrides[app.id].url});
+    if(!value.categories.some(category=>category.id==='student'))value.categories.unshift({id:'student',label:'生徒・授業',icon:'user',color:'#DD8700'});
+    [REQUIRED_STEP_GOAL_APP,REQUIRED_FORESTA_APP].forEach(app=>{
+      value.customApps=value.customApps.filter(item=>item.id!==app.id&&item.productionUrl!==app.productionUrl);
+      value.customApps.push(Object.assign({},app));
+      value.assignments[app.id]='student';value.devices[app.id]='both';
+      value.orders.student=Array.isArray(value.orders.student)?value.orders.student.filter(id=>id!==app.id):[];
+      value.orders.student.push(app.id);value.archived=value.archived.filter(id=>id!==app.id);value.deleted=value.deleted.filter(id=>id!==app.id);
+    });
     if(!value.categories.some(category=>category.id==='custom-management'))value.categories.splice(Math.min(3,value.categories.length),0,{id:'custom-management',label:'管理・運営',icon:'grid',color:'#276EE4'});
     [REQUIRED_REFERRAL_APP,REQUIRED_EXAM_TICKET_APP,REQUIRED_VCODE_APP].forEach(app=>{
       value.customApps=value.customApps.filter(item=>item.id!==app.id&&item.productionUrl!==app.productionUrl);
