@@ -278,7 +278,7 @@
       "displayName": "料金特別調整",
       "description": "イレギュラーな割引・加算を登録",
       "category": "billing",
-      "productionUrl": "https://stepkobetsu-hub.github.io/invoice-pdf/#adjustments",
+      "productionUrl": "https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIkpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec",
       "parentSystem": "スタッフ用アプリ",
       "keywords": [
         "料金",
