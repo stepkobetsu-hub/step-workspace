@@ -86,7 +86,7 @@
       "displayName": "請求書作成・送信・入金管理",
       "description": "請求書の作成・確認・メール送信・入金管理",
       "category": "billing",
-      "productionUrl": "https://stepkobetsu-hub.github.io/invoice-pdf/",
+      "productionUrl": "https://stepkobetsu-hub.github.io/invoice-pdf/#invoices",
       "parentSystem": "スタッフ用アプリ",
       "keywords": [
         "請求",
@@ -278,7 +278,7 @@
       "displayName": "料金特別調整",
       "description": "イレギュラーな割引・加算を登録",
       "category": "billing",
-      "productionUrl": "https://stepkobetsu-hub.github.io/seiseki-kanri/billing_adjustment.html",
+      "productionUrl": "https://stepkobetsu-hub.github.io/invoice-pdf/#adjustments",
       "parentSystem": "スタッフ用アプリ",
       "keywords": [
         "料金",
