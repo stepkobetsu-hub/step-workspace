@@ -3,7 +3,7 @@
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
   const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260902-app-links-1';
-  const APP_CATALOG='app-catalog.json?v=20260902-app-links-1';
+  const APP_CATALOG='app-catalog.json?v=20260902-billing-priority-1';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
@@ -19,6 +19,7 @@
   const REQUIRED_STEP_GOAL_APP={id:'learning-progress',displayName:'ステップ＆ゴール進捗管理',description:'ステップ＆ゴール教材の学習進捗・目標範囲・宿題チェック',category:'student',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/',parentSystem:'ステップ＆ゴール進捗管理',keywords:['ステップ','ゴール','学習進捗','目標範囲','宿題','D1','Cloudflare'],favorite:true,recent:true,status:'active'};
   const REQUIRED_FORESTA_APP={id:'foresta-progress-v2',displayName:'フォレスタ進捗管理',description:'学校授業の先取りを行う通常授業用の進捗・宿題・テスト範囲管理',category:'student',productionUrl:'https://stepkobetsu-hub.github.io/foresta-progress-v2/',parentSystem:'フォレスタ進捗管理',keywords:['フォレスタ','進捗','学校進度','宿題','テスト範囲','Supabase'],favorite:true,recent:true,status:'active'};
   const REQUIRED_TEACHER_BADGE_APP={id:'teacher-name-badge-print',displayName:'講師名札印刷',description:'講師を名前・よみ・ローマ字・コードで検索し、QR入り二つ折り名札をA4一枚で印刷',category:'teacher',productionUrl:'https://step-name-badge.mintcocoajasmine.chatgpt.site',parentSystem:'講師マスター／給与明細',keywords:['講師','名札','QR','印刷','苗字','よみがな','給与明細'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_BILLING_ADJUSTMENT_APP={id:'billing-special-adjustment',displayName:'料金特別調整',description:'重要・よく使う：イレギュラーな割引・加算を登録',category:'billing',productionUrl:'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIkpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec',parentSystem:'請求管理システム',keywords:['料金','特別調整','割引','加算','請求'],favorite:true,recent:true,status:'active'};
 
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve()};
   const byId=id=>document.getElementById(id);
@@ -67,6 +68,8 @@
     state.favorites=readJson(FAVORITES_KEY,null);
     if(!Array.isArray(state.favorites)){state.favorites=Core.defaultFavoriteIds(state.apps);writeJson(FAVORITES_KEY,state.favorites)}
     state.favorites=state.favorites.filter(id=>state.allApps.some(app=>app.id===id));
+    state.favorites=[REQUIRED_BILLING_ADJUSTMENT_APP.id,...state.favorites.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id)].slice(0,5);
+    writeJson(FAVORITES_KEY,state.favorites);
     state.recent=(readJson(RECENT_KEY,[])||[]).filter(entry=>state.allApps.some(app=>app.id===entry.id)).slice(0,5);
     renderAll();setScreen('home');requestSharedConfig();return true;
   }
@@ -130,6 +133,15 @@
       value.archived=value.archived.filter(id=>id!==app.id);
       value.deleted=value.deleted.filter(id=>id!==app.id);
     });
+    if(!value.categories.some(category=>category.id==='billing'))value.categories.push({id:'billing',label:'請求・会計',icon:'wallet',color:'#1D9550'});
+    value.customApps=value.customApps.filter(item=>item.id!==REQUIRED_BILLING_ADJUSTMENT_APP.id);
+    value.customApps.push(Object.assign({},REQUIRED_BILLING_ADJUSTMENT_APP));
+    value.assignments[REQUIRED_BILLING_ADJUSTMENT_APP.id]='billing';
+    value.devices[REQUIRED_BILLING_ADJUSTMENT_APP.id]='both';
+    value.orders.billing=Array.isArray(value.orders.billing)?value.orders.billing.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id):[];
+    value.orders.billing.unshift(REQUIRED_BILLING_ADJUSTMENT_APP.id);
+    value.archived=value.archived.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id);
+    value.deleted=value.deleted.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id);
     if(!value.categories.some(category=>category.id==='teacher'))value.categories.push({id:'teacher',label:'講師・給与',icon:'teacher',color:'#D54883'});
     [REQUIRED_PAYROLL_APP,REQUIRED_TEACHER_BADGE_APP].forEach(app=>{
       value.customApps=value.customApps.filter(item=>item.id!==app.id&&item.productionUrl!==app.productionUrl);
@@ -157,7 +169,8 @@
   function applySharedPayload(payload,version){
     if(!payload?.workspaceConfig)return false;
     state.sharedApplying=true;state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
-    if(Array.isArray(payload.favorites)){state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));writeJson(FAVORITES_KEY,state.favorites)}
+    if(Array.isArray(payload.favorites))state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));
+    state.favorites=[REQUIRED_BILLING_ADJUSTMENT_APP.id,...state.favorites.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id)].slice(0,5);writeJson(FAVORITES_KEY,state.favorites);
     state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
   }
   async function refreshSharedConfig(){
