@@ -3,14 +3,14 @@
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
   const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260822-progress-v3-1';
-  const APP_CATALOG='app-catalog.json?v=20260903-billing-urls-distinct-3';
+  const APP_CATALOG='app-catalog.json?v=20260903-billing-favicon-restored-4';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
-  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV4';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV5';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
   const byId=id=>document.getElementById(id);
