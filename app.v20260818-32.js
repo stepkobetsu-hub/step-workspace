@@ -135,7 +135,7 @@
     });
     if(!value.categories.some(category=>category.id==='billing'))value.categories.push({id:'billing',label:'請求・会計',icon:'wallet',color:'#1D9550'});
     value.customApps=value.customApps.filter(item=>item.id!==REQUIRED_BILLING_ADJUSTMENT_APP.id);
-    value.customApps.push(Object.assign({},REQUIRED_BILLING_ADJUSTMENT_APP));
+    value.customApps.unshift(Object.assign({},REQUIRED_BILLING_ADJUSTMENT_APP));
     value.assignments[REQUIRED_BILLING_ADJUSTMENT_APP.id]='billing';
     value.devices[REQUIRED_BILLING_ADJUSTMENT_APP.id]='both';
     value.orders.billing=Array.isArray(value.orders.billing)?value.orders.billing.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id):[];
