@@ -3,14 +3,14 @@
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
   const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260903-billing-favicon-1';
-  const APP_CATALOG='app-catalog.json?v=20260903-adjustments-cloudflare-2';
+  const APP_CATALOG='app-catalog.json?v=20260903-billing-urls-distinct-3';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
   const STAFF_PASSWORD_KEY='stepStaffAppPassword';
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
-  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV3';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV4';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const REQUIRED_REFERRAL_APP={id:'referral-card-reader',displayName:'お友達紹介カード読み取り',description:'紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',parentSystem:'スタッフ用アプリ',keywords:['お友達紹介','紹介カード','AI読取','図書カード','初回学費','割引','済'],favorite:true,recent:true,status:'active'};
   const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
@@ -19,7 +19,7 @@
   const REQUIRED_STEP_GOAL_APP={id:'learning-progress',displayName:'ステップ＆ゴール進捗管理',description:'ステップ＆ゴール教材の学習進捗・目標範囲・宿題チェック',category:'student',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/',parentSystem:'ステップ＆ゴール進捗管理',keywords:['ステップ','ゴール','学習進捗','目標範囲','宿題','D1','Cloudflare'],favorite:true,recent:true,status:'active'};
   const REQUIRED_FORESTA_APP={id:'foresta-progress-v2',displayName:'フォレスタ進捗管理',description:'学校授業の先取りを行う通常授業用の進捗・宿題・テスト範囲管理',category:'student',productionUrl:'https://stepkobetsu-hub.github.io/foresta-progress-v2/',parentSystem:'フォレスタ進捗管理',keywords:['フォレスタ','進捗','学校進度','宿題','テスト範囲','Supabase'],favorite:true,recent:true,status:'active'};
   const REQUIRED_TEACHER_BADGE_APP={id:'teacher-name-badge-print',displayName:'講師名札印刷',description:'講師を名前・よみ・ローマ字・コードで検索し、QR入り二つ折り名札をA4一枚で印刷',category:'teacher',productionUrl:'https://step-name-badge.mintcocoajasmine.chatgpt.site',parentSystem:'講師マスター／給与明細',keywords:['講師','名札','QR','印刷','苗字','よみがな','給与明細'],favorite:true,recent:true,status:'active'};
-  const REQUIRED_BILLING_ADJUSTMENT_APP={id:'billing-special-adjustment',displayName:'料金特別調整',description:'重要・よく使う：イレギュラーな割引・加算を登録',category:'billing',productionUrl:'https://stepkobetsu-hub.github.io/invoice-pdf/#adjustments',parentSystem:'請求システム',keywords:['料金','特別調整','割引','加算','請求'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_BILLING_ADJUSTMENT_APP={id:'billing-special-adjustment',displayName:'料金特別調整',description:'重要・よく使う：イレギュラーな割引・加算を登録',category:'billing',productionUrl:'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIkpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec?page=adjustments',parentSystem:'請求システム',keywords:['料金','特別調整','割引','加算','請求'],favorite:true,recent:true,status:'active'};
 
   const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
   const byId=id=>document.getElementById(id);
