@@ -1,7 +1,19 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-03",
+  "updatedAt": "2026-09-09",
   "apps": [
+    {
+      "id": "print-handwriting-cleaner",
+      "displayName": "プリント書き込み消去・再印刷",
+      "description": "教材の印刷内容を残して鉛筆・赤ペン等の書き込みを消し、A4で再印刷",
+      "category": "teacher",
+      "productionUrl": "https://stepkobetsu-hub.github.io/print-handwriting-cleaner/",
+      "parentSystem": "スタッフ用アプリ",
+      "keywords": ["プリント", "教材", "手書き", "書き込み", "消去", "再印刷", "A4"],
+      "favorite": true,
+      "recent": true,
+      "status": "active"
+    },
     {
       "id": "teacher-payroll-processing",
       "displayName": "講師給与計算・出力アプリ",
