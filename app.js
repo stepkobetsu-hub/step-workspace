@@ -12,7 +12,7 @@
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
   const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV6';
   const ALLOWED_PERMISSIONS=['2','3','4'];
-  const state={baseApps:[],registrySharedApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
+  const state={baseApps:[],registrySharedApps:[],registryPurposeOverrides:{ids:{},names:{}},allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
   const byId=id=>document.getElementById(id);
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
   const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}};
@@ -112,20 +112,22 @@
   function rebuildApps(){
     state.config=alignPurposeCategories(state.config);
     const custom=Core.buildApps(state.config.customApps);const seen=new Set();state.allApps=[...custom,...state.registrySharedApps,...state.baseApps].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
+    state.allApps.forEach(app=>{const name=Core.normalize(app.name);state.config.assignments[app.id]=state.registryPurposeOverrides.ids[app.id]||state.registryPurposeOverrides.names[name]||automaticPurposeCategory(app)});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
   }
+  function automaticPurposeCategory(app){const source=`${app.name||''} ${app.description||''} ${app.parentSystem||''}`;if(/請求|経理|給与|証憑|領収|不達メール|ゆうちょBIZ/.test(source))return 'billing';if(/講師|先生|コマ数|出勤/.test(source))return 'teacher';if(/生徒マスタ|成績|進捗|定期テスト|過去問|塾生アプリ|V-code|プリント書き込み/i.test(source))return 'student';if(/ホームページ|広告|宣伝|配信システム|お知らせ|問い合わせ/.test(source))return 'advertising';if(/受付|事務|面談|エントリー|紹介カード|遅刻|欠席|早退|QR|業務ホーム|管理ポータル|時間制限/.test(source))return 'contact';return 'admin'}
   function registryAppsFromShared(payload){
     const registry=payload?.registryConfig;if(!registry||!Array.isArray(registry.customCards))return [];
     const archived=new Set(Array.isArray(registry.archived)?registry.archived:[]);
     const source=registry.customCards.filter(item=>item?.id&&!archived.has(`custom:${item.id}`)&&item.url).map(item=>({id:`registry-user-${item.id}`,displayName:item.title||'追加カード',description:item.summary||'システム資産台帳から同期',category:registryPurposeCategory(item.purpose),productionUrl:item.url,parentSystem:'STEPシステム資産台帳',keywords:[item.audience,item.purpose].filter(Boolean),isNew:true,favorite:true,recent:true,status:'active'}));
     return Core.buildApps(source,{allowDuplicateUrls:true});
   }
-  function applyRegistryPurposeAssignments(payload,workspaceConfig){const cards=payload?.registryConfig?.cards;if(!cards||typeof cards!=='object')return workspaceConfig;for(const [key,override] of Object.entries(cards)){if(!override?.purpose)continue;let app=null;if(key.startsWith('id:'))app=state.baseApps.find(item=>item.id===key.slice(3));else if(key.startsWith('name:')){const name=key.slice(5).split('|')[0];app=state.baseApps.find(item=>item.name===name)}if(app)workspaceConfig.assignments[app.id]=registryPurposeCategory(override.purpose)}return workspaceConfig}
+  function applyRegistryPurposeAssignments(payload){const result={ids:{},names:{}};const cards=payload?.registryConfig?.cards;if(!cards||typeof cards!=='object')return result;for(const [key,override] of Object.entries(cards)){if(!override?.purpose)continue;const category=registryPurposeCategory(override.purpose);if(key.startsWith('id:')){const id=key.slice(3),app=state.baseApps.find(item=>item.id===id);result.ids[id]=category;if(app)result.names[Core.normalize(app.name)]=category}else if(key.startsWith('name:'))result.names[Core.normalize(key.slice(5).split('|')[0])]=category}return result}
   function sharedPayload(){return Object.assign({},clone(state.sharedEnvelope||{}),{schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]})}
   function setSyncStatus(message,status){const root=byId('syncStatus');if(!root)return;root.textContent=message;root.dataset.status=status||''}
   function applySharedPayload(payload,version){
     if(!payload?.workspaceConfig)return false;
-    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.registrySharedApps=registryAppsFromShared(payload);state.config=applyRegistryPurposeAssignments(payload,Core.normalizeWorkspaceConfig(payload.workspaceConfig));writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
+    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.registrySharedApps=registryAppsFromShared(payload);state.registryPurposeOverrides=applyRegistryPurposeAssignments(payload);state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
     if(Array.isArray(payload.favorites)){state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));writeJson(FAVORITES_KEY,state.favorites)}
     state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
   }
