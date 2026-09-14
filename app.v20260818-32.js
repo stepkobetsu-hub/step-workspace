@@ -110,10 +110,12 @@
     updateHistoryButtons();
   }
   const clone=value=>JSON.parse(JSON.stringify(value));
+  function registryPurposeCategory(purpose){const known={'請求・経理':'billing','講師':'teacher','生徒・成績':'student','受付・事務':'contact','広告宣伝':'advertising','その他':'admin'};const name=String(purpose||'');if(known[name])return known[name];let hash=0;for(const char of name)hash=(hash*31+char.codePointAt(0))>>>0;return name?`custom-purpose-${hash.toString(36)}`:'admin'}
+  function purposeCategoryDefinitions(registryConfig){const types=Array.isArray(registryConfig?.purposeTypes)&&registryConfig.purposeTypes.length?registryConfig.purposeTypes:Core.CATEGORIES.map(item=>({name:item.label,color:item.color}));return types.map(type=>{const id=registryPurposeCategory(type.name);const base=Core.CATEGORIES.find(item=>item.id===id);return {id,label:String(type.name||base?.label||'その他'),icon:base?.icon||'grid',color:/^#[0-9a-f]{6}$/i.test(String(type.color||''))?String(type.color).toUpperCase():(base?.color||'#64748B')}})}
   function alignPurposeCategories(config){
-    const value=Core.normalizeWorkspaceConfig(config);const ids=new Set(Core.CATEGORIES.map(item=>item.id));const moved=[];
+    const value=Core.normalizeWorkspaceConfig(config);const definitions=purposeCategoryDefinitions(state.sharedEnvelope?.registryConfig);const ids=new Set(definitions.map(item=>item.id));const moved=[];
     Object.entries(value.orders||{}).forEach(([id,items])=>{if(!ids.has(id)&&Array.isArray(items))moved.push(...items)});
-    value.categories=Core.CATEGORIES.map(item=>({id:item.id,label:item.label,icon:item.icon,color:item.color}));value.removedCategories=[];
+    value.categories=definitions;value.removedCategories=[];
     Object.keys(value.assignments||{}).forEach(id=>{if(!ids.has(value.assignments[id]))value.assignments[id]='admin'});
     value.orders=Object.fromEntries(Object.entries(value.orders||{}).filter(([id])=>ids.has(id)));value.orders.admin=[...new Set([...(value.orders.admin||[]),...moved])];
     return Core.normalizeWorkspaceConfig(value);
@@ -173,18 +175,18 @@
     const custom=Core.buildApps(state.config.customApps,{allowDuplicateUrls:true});const catalog=state.config.replaceCatalog?[]:state.baseApps;const seen=new Set();let billingAdjustmentAdded=false;state.allApps=[...custom,...state.registrySharedApps,...catalog].filter(app=>{const isBillingAdjustment=app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id||/料金特別調整/.test(app.name);if(seen.has(app.id)||state.config.deleted.includes(app.id)||(isBillingAdjustment&&billingAdjustmentAdded))return false;seen.add(app.id);if(isBillingAdjustment)billingAdjustmentAdded=true;return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
   }
-  function registryPurposeCategory(purpose){return {'請求・経理':'billing','講師':'teacher','生徒・成績':'student','受付・事務':'contact','広告宣伝':'advertising','その他':'admin'}[String(purpose||'')]||'admin'}
   function registryAppsFromShared(payload){
     const registry=payload?.registryConfig;if(!registry||!Array.isArray(registry.customCards))return [];
     const archived=new Set(Array.isArray(registry.archived)?registry.archived:[]);
     const source=registry.customCards.filter(item=>item?.id&&!archived.has(`custom:${item.id}`)&&item.url).map(item=>({id:`registry-user-${item.id}`,displayName:item.title||'追加カード',description:item.summary||'システム資産台帳から同期',category:registryPurposeCategory(item.purpose),productionUrl:item.url,parentSystem:'STEPシステム資産台帳',keywords:[item.audience,item.purpose].filter(Boolean),isNew:true,favorite:true,recent:true,status:'active'}));
     return Core.buildApps(source,{allowDuplicateUrls:true});
   }
+  function applyRegistryPurposeAssignments(payload,workspaceConfig){const cards=payload?.registryConfig?.cards;if(!cards||typeof cards!=='object')return workspaceConfig;for(const [key,override] of Object.entries(cards)){if(!override?.purpose)continue;let app=null;if(key.startsWith('id:'))app=state.baseApps.find(item=>item.id===key.slice(3));else if(key.startsWith('name:')){const name=key.slice(5).split('|')[0];app=state.baseApps.find(item=>item.name===name)}if(app)workspaceConfig.assignments[app.id]=registryPurposeCategory(override.purpose)}return workspaceConfig}
   function sharedPayload(){return Object.assign({},clone(state.sharedEnvelope||{}),{schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]})}
   function setSyncStatus(message,status){const root=byId('syncStatus');if(!root)return;root.textContent=message;root.dataset.status=status||''}
   function applySharedPayload(payload,version){
     if(!payload?.workspaceConfig)return false;
-    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.registrySharedApps=registryAppsFromShared(payload);state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
+    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.registrySharedApps=registryAppsFromShared(payload);state.config=applyRegistryPurposeAssignments(payload,Core.normalizeWorkspaceConfig(payload.workspaceConfig));writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
     if(Array.isArray(payload.favorites))state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));
     state.favorites=[REQUIRED_BILLING_ADJUSTMENT_APP.id,...state.favorites.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id)].slice(0,5);writeJson(FAVORITES_KEY,state.favorites);
     state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
