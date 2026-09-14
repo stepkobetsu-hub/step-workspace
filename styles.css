@@ -27,3 +27,4 @@
 .favorite-button.is-favorite{color:#e5486c}
 .app-shell:not(.is-admin-mode) .device-control{display:block}.app-shell:not(.is-admin-mode) .edit-card-button{display:inline-grid;place-items:center}.card-tools{flex-wrap:nowrap}.edit-card-button{flex:none}
 @media(max-width:650px){.card-head{align-items:flex-start;padding-right:9px;padding-left:10px}.card-tools{gap:0}.device-control select{width:54px;padding:0 2px;font-size:9px}.favorite-button,.edit-card-button,.archive-card-button{width:24px}.app-icon{width:34px;height:34px}}
+.new-badge{align-self:flex-start;margin-left:5px;padding:3px 6px;border-radius:999px;background:#e5484d;color:#fff;font-size:8px;font-weight:800;line-height:1;letter-spacing:.04em}.category-advertising{--accent:#be185d;--accent-soft:#fcecf3}

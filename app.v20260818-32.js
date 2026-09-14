@@ -2,7 +2,7 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260903-billing-favicon-1';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json';
   const APP_CATALOG='app-catalog.json?v=20260903-billing-favicon-restored-4';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
@@ -10,7 +10,7 @@
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
-  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV5';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV6';
   const ALLOWED_PERMISSIONS=['2','3','4'];
   const REQUIRED_REFERRAL_APP={id:'referral-card-reader',displayName:'お友達紹介カード読み取り',description:'紹介カードをAIで読み取り、原本画像・取込日時・紹介者／入塾者情報・3つの特典処理状況を保存',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/referral_card_import.html',parentSystem:'スタッフ用アプリ',keywords:['お友達紹介','紹介カード','AI読取','図書カード','初回学費','割引','済'],favorite:true,recent:true,status:'active'};
   const REQUIRED_EXAM_TICKET_APP={id:'aichi-exam-ticket',displayName:'全県模試受験票作成',description:'年度・受験回と生徒を選び、受験番号・校舎名・学年別時間割入りのA4受験票を一括印刷',category:'custom-management',productionUrl:'https://stepkobetsu-hub.github.io/step-message-center/exam_ticket.html',parentSystem:'STEP配信システム',keywords:['全県模試','愛知全県模試','受験票','受験番号','模試','印刷','時間割','年度'],favorite:true,recent:true,status:'active'};
@@ -19,9 +19,9 @@
   const REQUIRED_STEP_GOAL_APP={id:'learning-progress',displayName:'ステップ＆ゴール進捗管理',description:'ステップ＆ゴール教材の学習進捗・目標範囲・宿題チェック',category:'student',productionUrl:'https://step-progress-api.stepkobetsu.workers.dev/',parentSystem:'ステップ＆ゴール進捗管理',keywords:['ステップ','ゴール','学習進捗','目標範囲','宿題','D1','Cloudflare'],favorite:true,recent:true,status:'active'};
   const REQUIRED_FORESTA_APP={id:'foresta-progress-v2',displayName:'フォレスタ進捗管理',description:'学校授業の先取りを行う通常授業用の進捗・宿題・テスト範囲管理',category:'student',productionUrl:'https://stepkobetsu-hub.github.io/foresta-progress-v2/',parentSystem:'フォレスタ進捗管理',keywords:['フォレスタ','進捗','学校進度','宿題','テスト範囲','Supabase'],favorite:true,recent:true,status:'active'};
   const REQUIRED_TEACHER_BADGE_APP={id:'teacher-name-badge-print',displayName:'講師名札印刷',description:'講師を名前・よみ・ローマ字・コードで検索し、QR入り二つ折り名札をA4一枚で印刷',category:'teacher',productionUrl:'https://step-name-badge.mintcocoajasmine.chatgpt.site',parentSystem:'講師マスター／給与明細',keywords:['講師','名札','QR','印刷','苗字','よみがな','給与明細'],favorite:true,recent:true,status:'active'};
-  const REQUIRED_BILLING_ADJUSTMENT_APP={id:'billing-special-adjustment',displayName:'料金特別調整',description:'重要・よく使う：イレギュラーな割引・加算を登録',category:'billing',productionUrl:'https://stepkobetsu-hub.github.io/seiseki-kanri/billing_adjustment.html',parentSystem:'請求システム',keywords:['料金','特別調整','割引','加算','請求'],favorite:true,recent:true,status:'active'};
+  const REQUIRED_BILLING_ADJUSTMENT_APP={id:'billing-special-adjustment',displayName:'料金特別調整',description:'重要・よく使う：イレギュラーな割引・加算を登録',category:'billing',productionUrl:'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIkpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec?page=adjustments',parentSystem:'請求システム',keywords:['料金','特別調整','割引','加算','請求'],favorite:true,recent:true,status:'active'};
 
-  const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
+  const state={baseApps:[],registrySharedApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
   const byId=id=>document.getElementById(id);
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
   const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}};
@@ -82,7 +82,8 @@
     saveRegistryCache(source);return true;
   }
   async function loadRegistry(){
-    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_EXPORT).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG).then(response=>response.ok?response.json():null).catch(()=>null)]);
+    const registryUrl=`${REGISTRY_EXPORT}?updated=${Date.now()}`;
+    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(registryUrl,{cache:'no-cache'}).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG).then(response=>response.ok?response.json():null).catch(()=>null)]);
     if(!result.success)throw new Error(result.error||'アプリ一覧を取得できませんでした。');
     const registered=Array.isArray(registryExport?.apps)?registryExport.apps:[];const systems=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;const source=Core.mergeCatalogSources(systems,catalogExport?.apps);
     if(!showRegistrySource(source))throw new Error('利用できるアプリが登録されていません。');saveRegistryCache(source);
@@ -109,8 +110,16 @@
     updateHistoryButtons();
   }
   const clone=value=>JSON.parse(JSON.stringify(value));
+  function alignPurposeCategories(config){
+    const value=Core.normalizeWorkspaceConfig(config);const ids=new Set(Core.CATEGORIES.map(item=>item.id));const moved=[];
+    Object.entries(value.orders||{}).forEach(([id,items])=>{if(!ids.has(id)&&Array.isArray(items))moved.push(...items)});
+    value.categories=Core.CATEGORIES.map(item=>({id:item.id,label:item.label,icon:item.icon,color:item.color}));value.removedCategories=[];
+    Object.keys(value.assignments||{}).forEach(id=>{if(!ids.has(value.assignments[id]))value.assignments[id]='admin'});
+    value.orders=Object.fromEntries(Object.entries(value.orders||{}).filter(([id])=>ids.has(id)));value.orders.admin=[...new Set([...(value.orders.admin||[]),...moved])];
+    return Core.normalizeWorkspaceConfig(value);
+  }
   function ensureRequiredApps(config){
-    const value=Core.normalizeWorkspaceConfig(config);
+    const value=alignPurposeCategories(config);
     const canonicalApps=[REQUIRED_PAYROLL_APP,REQUIRED_STEP_GOAL_APP,REQUIRED_FORESTA_APP];
     value.customApps=value.customApps.map(app=>{const canonical=canonicalApps.find(item=>item.id===app.id);return canonical?Object.assign({},app,canonical):app});
     canonicalApps.forEach(app=>{if(value.cardOverrides?.[app.id]?.url)delete value.cardOverrides[app.id].url});
@@ -157,18 +166,25 @@
       value.archived=value.archived.filter(id=>id!==app.id);
       value.deleted=value.deleted.filter(id=>id!==app.id);
     });
-    return value;
+    return alignPurposeCategories(value);
   }
   function rebuildApps(){
     state.config=ensureRequiredApps(state.config);
-    const custom=Core.buildApps(state.config.customApps,{allowDuplicateUrls:true});const catalog=state.config.replaceCatalog?[]:state.baseApps;const seen=new Set();let billingAdjustmentAdded=false;state.allApps=[...custom,...catalog].filter(app=>{const isBillingAdjustment=app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id||/料金特別調整/.test(app.name);if(seen.has(app.id)||state.config.deleted.includes(app.id)||(isBillingAdjustment&&billingAdjustmentAdded))return false;seen.add(app.id);if(isBillingAdjustment)billingAdjustmentAdded=true;return true});
+    const custom=Core.buildApps(state.config.customApps,{allowDuplicateUrls:true});const catalog=state.config.replaceCatalog?[]:state.baseApps;const seen=new Set();let billingAdjustmentAdded=false;state.allApps=[...custom,...state.registrySharedApps,...catalog].filter(app=>{const isBillingAdjustment=app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id||/料金特別調整/.test(app.name);if(seen.has(app.id)||state.config.deleted.includes(app.id)||(isBillingAdjustment&&billingAdjustmentAdded))return false;seen.add(app.id);if(isBillingAdjustment)billingAdjustmentAdded=true;return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
+  }
+  function registryPurposeCategory(purpose){return {'請求・経理':'billing','講師':'teacher','生徒・成績':'student','受付・事務':'contact','広告宣伝':'advertising','その他':'admin'}[String(purpose||'')]||'admin'}
+  function registryAppsFromShared(payload){
+    const registry=payload?.registryConfig;if(!registry||!Array.isArray(registry.customCards))return [];
+    const archived=new Set(Array.isArray(registry.archived)?registry.archived:[]);
+    const source=registry.customCards.filter(item=>item?.id&&!archived.has(`custom:${item.id}`)&&item.url).map(item=>({id:`registry-user-${item.id}`,displayName:item.title||'追加カード',description:item.summary||'システム資産台帳から同期',category:registryPurposeCategory(item.purpose),productionUrl:item.url,parentSystem:'STEPシステム資産台帳',keywords:[item.audience,item.purpose].filter(Boolean),isNew:true,favorite:true,recent:true,status:'active'}));
+    return Core.buildApps(source,{allowDuplicateUrls:true});
   }
   function sharedPayload(){return Object.assign({},clone(state.sharedEnvelope||{}),{schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]})}
   function setSyncStatus(message,status){const root=byId('syncStatus');if(!root)return;root.textContent=message;root.dataset.status=status||''}
   function applySharedPayload(payload,version){
     if(!payload?.workspaceConfig)return false;
-    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
+    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.registrySharedApps=registryAppsFromShared(payload);state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
     if(Array.isArray(payload.favorites))state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));
     state.favorites=[REQUIRED_BILLING_ADJUSTMENT_APP.id,...state.favorites.filter(id=>id!==REQUIRED_BILLING_ADJUSTMENT_APP.id)].slice(0,5);writeJson(FAVORITES_KEY,state.favorites);
     state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
@@ -226,7 +242,7 @@
       card.addEventListener('dragleave',event=>{if(!card.contains(event.relatedTarget))card.classList.remove('is-drop-before','is-drop-after')});
       card.addEventListener('drop',event=>{event.preventDefault();event.stopPropagation();const dragged=event.dataTransfer.getData('application/x-step-app')||event.dataTransfer.getData('text/plain');const after=card.classList.contains('is-drop-after');card.classList.remove('is-drop-before','is-drop-after');moveAppRelative(dragged,app.id,after)});
     }
-    renderAppIcon(card.querySelector('.app-icons'),app);card.querySelector('.app-copy strong').textContent=app.name;const description=card.querySelector('.app-copy small');description.textContent=app.description;description.title=app.description;const cardUrl=card.querySelector('.card-url');if(app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id){cardUrl.hidden=false;cardUrl.textContent=app.url;cardUrl.title=app.url}card.querySelector('.app-category-tag').textContent=app.categoryLabel;
+    renderAppIcon(card.querySelector('.app-icons'),app);const newBadge=card.querySelector('.new-badge');newBadge.hidden=!app.isNew;card.querySelector('.app-copy strong').textContent=app.name;const description=card.querySelector('.app-copy small');description.textContent=app.description;description.title=app.description;const cardUrl=card.querySelector('.card-url');if(app.id===REQUIRED_BILLING_ADJUSTMENT_APP.id){cardUrl.hidden=false;cardUrl.textContent=app.url;cardUrl.title=app.url}card.querySelector('.app-category-tag').textContent=app.categoryLabel;
     const link=card.querySelector('.app-link');
     if(app.url){link.href=app.url;link.target='_blank';link.rel='noopener noreferrer';if(app.recentEnabled)link.addEventListener('click',()=>recordRecent(app.id))}
     else{card.classList.add('is-unavailable');link.removeAttribute('href');link.setAttribute('aria-disabled','true');card.querySelector('.open-label').textContent='本番URL確認中'}
@@ -257,7 +273,7 @@
       const grid=document.createElement('div');grid.className='app-grid';grid.dataset.categoryId=category.id;replaceCards(grid,apps,'category');if(!apps.length){grid.classList.add('is-empty-category');const empty=document.createElement('p');empty.textContent=state.organizing?'ここへカードを移動できます':'カードはまだありません';grid.append(empty)}grid.addEventListener('dragover',event=>{if(!state.organizing)return;event.preventDefault();grid.classList.add('is-drop-target')});grid.addEventListener('dragleave',()=>grid.classList.remove('is-drop-target'));grid.addEventListener('drop',event=>{event.preventDefault();grid.classList.remove('is-drop-target');moveApp(event.dataTransfer.getData('text/plain'),category.id)});section.append(header,grid);sections.append(section);
     });filterCategoryNavigation();
   }
-  function categoryDescription(id,count){const descriptions={student:'生徒情報・成績・面談・学習支援',contact:'配信・受付・連絡・QR関連',billing:'請求・入金・帳票・会計処理',teacher:'講師管理・授業報告・給与関連',admin:'マスター・設定・データ管理'};return descriptions[id]||`${count}件の業務アプリをまとめています`}
+  function categoryDescription(id,count){const descriptions={billing:'請求・経理・入金・帳票',teacher:'講師管理・授業報告・給与',student:'生徒情報・成績・学習支援',contact:'受付・事務・連絡・QR',advertising:'広告・宣伝・集客・お知らせ',admin:'その他の管理・設定・データ'};return descriptions[id]||`${count}件の業務アプリをまとめています`}
   function filterCategoryNavigation(){const query=Core.normalize(byId('categorySearch').value);let visible=0;byId('categoryTabs').querySelectorAll('.category-nav-item').forEach(item=>{const match=!query||item.dataset.search.includes(query);item.hidden=!match;if(match)visible++});byId('categoryNavEmpty').hidden=visible>0}
   function syncSearch(source){const value=source.value;byId('searchInput').value=value;byId('categorySearch').value=value;filterCategoryNavigation();renderSearch()}
   function renderSearch(){

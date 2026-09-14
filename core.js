@@ -7,11 +7,12 @@
   const CATEGORY_ICON_IDS=['grid','user','chat','wallet','teacher','gear','chart','calendar','file','mail','qr','clock','book','school','calculator','clipboard','star','database','phone','shield'];
   const CATEGORY_COLORS=['#276EE4','#1D9550','#DD8700','#D54883','#6751C7','#0E8A92','#C2415D','#58708F','#7C5C20','#6D7785'];
   const CATEGORIES=[
-    {id:'student',label:'生徒・授業',className:'category-student',initial:'生',icon:'user',color:'#DD8700'},
-    {id:'contact',label:'連絡・受付',className:'category-contact',initial:'連',icon:'chat',color:'#276EE4'},
-    {id:'billing',label:'請求・会計',className:'category-billing',initial:'請',icon:'wallet',color:'#1D9550'},
-    {id:'teacher',label:'講師・給与',className:'category-teacher',initial:'講',icon:'teacher',color:'#D54883'},
-    {id:'admin',label:'ポイント・その他',className:'category-admin',initial:'他',icon:'gear',color:'#6D7785'}
+    {id:'billing',label:'請求・経理',className:'category-billing',initial:'請',icon:'wallet',color:'#B45309'},
+    {id:'teacher',label:'講師',className:'category-teacher',initial:'講',icon:'teacher',color:'#1D4ED8'},
+    {id:'student',label:'生徒・成績',className:'category-student',initial:'生',icon:'book',color:'#15803D'},
+    {id:'contact',label:'受付・事務',className:'category-contact',initial:'受',icon:'clipboard',color:'#0E7490'},
+    {id:'advertising',label:'広告宣伝',className:'category-advertising',initial:'広',icon:'mail',color:'#BE185D'},
+    {id:'admin',label:'その他',className:'category-admin',initial:'他',icon:'grid',color:'#64748B'}
   ];
   const URL_FIELDS=['productionUrl','利用者向けURL','本番URL','アプリURL','WebアプリURL','Apps Script WebアプリURL','管理者向けURL','読み取りURL','入力フォームURL','Google Sheet URL','GitHub Pages URL'];
   const DESCRIPTION_RULES=[
@@ -45,7 +46,8 @@
   function categoryId(item){
     const explicit=normalize(item.category||item.categoryId||item['分類']);const named=CATEGORIES.find(category=>explicit===normalize(category.id)||explicit===normalize(category.label));if(named)return named.id;
     const name=nameOf(item);const value=name+' '+text(item['分類']);
-    if(/請求|会計|領収|学費|invoice/i.test(name))return 'billing';
+    if(/請求|会計|経理|仕訳|領収|学費|invoice/i.test(name))return 'billing';
+    if(/広告|宣伝|集客|チラシ|SNS|Instagram|YouTube/i.test(name))return 'advertising';
     if(/出退くん|QR作成|QR読取|不達|配信|問い合わせ|受付/.test(name))return 'contact';
     if(/講師|先生|給与|出勤/.test(name))return 'teacher';
     if(/請求|会計|領収|学費|invoice/i.test(value))return 'billing';
@@ -76,7 +78,7 @@
   function toApp(item){
     const category=CATEGORIES.find(value=>value.id===categoryId(item))||CATEGORIES.at(-1);
     const url=firstUrl(item);
-    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url,productionUrl:url,parentSystem:text(item.parentSystem),status:statusOf(item),favoriteEnabled:item.favorite!==false,recentEnabled:item.recent!==false,iconType:isGoogleSheetUrl(url)?'google-sheet':'category',categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
+    return {id:idOf(item),name:nameOf(item),description:descriptionOf(item),url,productionUrl:url,parentSystem:text(item.parentSystem),status:statusOf(item),isNew:item.isNew===true||item._workspaceNew===true,favoriteEnabled:item.favorite!==false,recentEnabled:item.recent!==false,iconType:isGoogleSheetUrl(url)?'google-sheet':'category',categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,searchText:normalize(keywordsOf(item,category)),source:item};
   }
   function buildApps(items,options={}){const seenIds=new Set();const seenUrls=new Set();const allowDuplicateUrls=options.allowDuplicateUrls===true;return (Array.isArray(items)?items:[]).map(toApp).filter(app=>{if(app.status!=='active')return false;const key=urlKey(app.url);if(seenIds.has(app.id)||(!allowDuplicateUrls&&key&&seenUrls.has(key)))return false;seenIds.add(app.id);if(key)seenUrls.add(key);return true})}
   function plainMarkdown(value){return text(value).replace(/^\[([^\]]+)\]\([^\)]+\)$/,'$1').replace(/`/g,'')}
@@ -100,7 +102,7 @@
   }
   function mergeCatalogSources(registryItems,catalogItems){
     const catalog=Array.isArray(catalogItems)?catalogItems:[];const replacements=new Set(catalog.flatMap(item=>Array.isArray(item.replaces)?item.replaces:[]).map(normalize));const catalogUrls=new Set(catalog.map(firstUrl).filter(Boolean).map(urlKey));
-    const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))});
+    const registry=(Array.isArray(registryItems)?registryItems:[]).filter(item=>{const url=urlKey(firstUrl(item));return !replacements.has(normalize(nameOf(item)))&&!(url&&catalogUrls.has(url))}).map(item=>Object.assign({},item,{_workspaceNew:true}));
     return [...catalog,...registry];
   }
   function defaultWorkspaceConfig(){return {categories:CATEGORIES.map(category=>({id:category.id,label:category.label,icon:category.icon,color:category.color})),removedCategories:[],assignments:{},orders:{},devices:{},cardOverrides:{},customApps:[],archived:[],deleted:[],replaceCatalog:false}}
@@ -123,7 +125,7 @@
     const label=text(item?.label)||base?.label||'その他';const icon=CATEGORY_ICON_IDS.includes(text(item?.icon))?text(item.icon):(base?.icon||'grid');const color=CATEGORY_COLORS.includes(text(item?.color).toUpperCase())?text(item.color).toUpperCase():(base?.color||CATEGORY_COLORS[0]);return {id,label,className:base?.className||'category-custom',initial:(base?.initial||label.charAt(0)||'他'),icon,color,softColor:`${color}18`,custom:!base};
   }
   function applyWorkspaceConfig(apps,value){
-    const config=normalizeWorkspaceConfig(value);return (Array.isArray(apps)?apps:[]).map(app=>{const category=categoryDefinition(config.assignments[app.id]||app.categoryId,config.categories);const override=config.cardOverrides[app.id]||{};const name=override.name||app.name;const description=override.description||app.description;const requestedUrl=override.url||app.url;const billingAdjustment=app.id==='billing-special-adjustment'||/料金特別調整/.test(name);const invoiceDelivery=app.id==='invoice-pdf'||/STEP請求書PDF|請求書作成・送信・入金管理|請求書作成・配信/.test(name);const url=billingAdjustment?'https://stepkobetsu-hub.github.io/seiseki-kanri/billing_adjustment.html':invoiceDelivery?'https://stepkobetsu-hub.github.io/invoice-pdf/#invoices':requestedUrl;const iconType=override.googleSheet===undefined?(isGoogleSheetUrl(url)?'google-sheet':app.iconType):(override.googleSheet?'google-sheet':'category');return Object.assign({},app,{name,description,url,productionUrl:url,iconType,searchText:normalize([name,description,app.parentSystem,category.label].join(' ')),categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,categoryIcon:category.icon,categoryColor:category.color,categorySoftColor:category.softColor,device:config.devices[app.id]||'both'})});
+    const config=normalizeWorkspaceConfig(value);return (Array.isArray(apps)?apps:[]).map(app=>{const category=categoryDefinition(config.assignments[app.id]||app.categoryId,config.categories);const override=config.cardOverrides[app.id]||{};const name=override.name||app.name;const description=override.description||app.description;const requestedUrl=override.url||app.url;const billingAdjustment=app.id==='billing-special-adjustment'||/料金特別調整/.test(name);const invoiceDelivery=app.id==='invoice-pdf'||/STEP請求書PDF|請求書作成・送信・入金管理|請求書作成・配信/.test(name);const url=billingAdjustment?'https://script.google.com/macros/s/AKfycbxzkE1tQRyB_Ca4bfPKYWIkpTukIVPMWKf2ETE7yN7qROJk0VyOlvxaJ9GGI5p-6pGb/exec?page=adjustments':invoiceDelivery?'https://stepkobetsu-hub.github.io/invoice-pdf/#invoices':requestedUrl;const iconType=override.googleSheet===undefined?(isGoogleSheetUrl(url)?'google-sheet':app.iconType):(override.googleSheet?'google-sheet':'category');return Object.assign({},app,{name,description,url,productionUrl:url,iconType,searchText:normalize([name,description,app.parentSystem,category.label].join(' ')),categoryId:category.id,categoryLabel:category.label,categoryClass:category.className,initial:category.initial,categoryIcon:category.icon,categoryColor:category.color,categorySoftColor:category.softColor,device:config.devices[app.id]||'both'})});
   }
   function filterApps(apps,query){const q=normalize(query);return q?apps.filter(app=>app.searchText.includes(q)):apps.slice()}
   function defaultFavoriteIds(apps){const patterns=[/STEP配信/,/請求管理システムV?3\.1/,/請求書(?:PDF|作成)/,/成績管理/,/生徒マスタ/];const ids=[];for(const pattern of patterns){const app=apps.find(value=>value.favoriteEnabled&&pattern.test(value.name)&&!ids.includes(value.id));if(app)ids.push(app.id)}return ids.slice(0,5)}

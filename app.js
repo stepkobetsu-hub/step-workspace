@@ -2,7 +2,7 @@
   'use strict';
   const Core=window.StepWorkspaceCore;
   const GAS='https://script.google.com/macros/s/AKfycbypkUc0MqZ07E7pZRglNPeRM56WbCcuWaLpRzi9bVFcPklHDxaaLC7GfzG6ozTGCbEX/exec';
-  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json?v=20260822-progress-v3-1';
+  const REGISTRY_EXPORT='https://stepkobetsu-hub.github.io/step-system-registry/workspace-apps.json';
   const APP_CATALOG='app-catalog.json?v=20260903-billing-favicon-restored-4';
   const AUTH_KEY='stepStaffAppAuth';
   const STAFF_CODE_KEY='stepStaffAppCode';
@@ -10,9 +10,9 @@
   const FAVORITES_KEY='stepWorkspaceFavoritesV1';
   const RECENT_KEY='stepWorkspaceRecentV1';
   const WORKSPACE_CONFIG_KEY='stepWorkspaceConfigV1';
-  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV5';
+  const REGISTRY_CACHE_KEY='stepWorkspaceRegistryCacheV6';
   const ALLOWED_PERMISSIONS=['2','3','4'];
-  const state={baseApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
+  const state={baseApps:[],registrySharedApps:[],allApps:[],apps:[],favorites:[],recent:[],auth:null,config:Core.defaultWorkspaceConfig(),organizing:false,adminMode:false,history:{past:[],future:[]},sharedReady:false,sharedVersion:0,sharedLoading:false,sharedApplying:false,sharedPublishing:false,sharedSaveTimer:null,sharedSavePromise:Promise.resolve(),sharedEnvelope:{}};
   const byId=id=>document.getElementById(id);
   const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch(_){return fallback}};
   const writeJson=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value))}catch(_){}};
@@ -71,7 +71,8 @@
     saveRegistryCache(source);return true;
   }
   async function loadRegistry(){
-    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(REGISTRY_EXPORT).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG).then(response=>response.ok?response.json():null).catch(()=>null)]);
+    const registryUrl=`${REGISTRY_EXPORT}?updated=${Date.now()}`;
+    const [result,registryExport,catalogExport]=await Promise.all([api('getSystemRegistry'),fetch(registryUrl,{cache:'no-cache'}).then(response=>response.ok?response.json():null).catch(()=>null),fetch(APP_CATALOG).then(response=>response.ok?response.json():null).catch(()=>null)]);
     if(!result.success)throw new Error(result.error||'アプリ一覧を取得できませんでした。');
     const registered=Array.isArray(registryExport?.apps)?registryExport.apps:[];const systems=registered.length?Core.mergeRegistrySources(result.systems,registered):result.systems;const source=Core.mergeCatalogSources(systems,catalogExport?.apps);
     if(!showRegistrySource(source))throw new Error('利用できるアプリが登録されていません。');saveRegistryCache(source);
@@ -98,15 +99,31 @@
     updateHistoryButtons();
   }
   const clone=value=>JSON.parse(JSON.stringify(value));
+  function alignPurposeCategories(config){
+    const value=Core.normalizeWorkspaceConfig(config);const ids=new Set(Core.CATEGORIES.map(item=>item.id));const moved=[];
+    Object.entries(value.orders||{}).forEach(([id,items])=>{if(!ids.has(id)&&Array.isArray(items))moved.push(...items)});
+    value.categories=Core.CATEGORIES.map(item=>({id:item.id,label:item.label,icon:item.icon,color:item.color}));value.removedCategories=[];
+    Object.keys(value.assignments||{}).forEach(id=>{if(!ids.has(value.assignments[id]))value.assignments[id]='admin'});
+    value.orders=Object.fromEntries(Object.entries(value.orders||{}).filter(([id])=>ids.has(id)));value.orders.admin=[...new Set([...(value.orders.admin||[]),...moved])];
+    return Core.normalizeWorkspaceConfig(value);
+  }
   function rebuildApps(){
-    const custom=Core.buildApps(state.config.customApps);const seen=new Set();state.allApps=[...custom,...state.baseApps].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
+    state.config=alignPurposeCategories(state.config);
+    const custom=Core.buildApps(state.config.customApps);const seen=new Set();state.allApps=[...custom,...state.registrySharedApps,...state.baseApps].filter(app=>{if(seen.has(app.id)||state.config.deleted.includes(app.id))return false;seen.add(app.id);return true});
     state.apps=Core.applyWorkspaceConfig(state.allApps.filter(app=>!state.config.archived.includes(app.id)),state.config);
+  }
+  function registryPurposeCategory(purpose){return {'請求・経理':'billing','講師':'teacher','生徒・成績':'student','受付・事務':'contact','広告宣伝':'advertising','その他':'admin'}[String(purpose||'')]||'admin'}
+  function registryAppsFromShared(payload){
+    const registry=payload?.registryConfig;if(!registry||!Array.isArray(registry.customCards))return [];
+    const archived=new Set(Array.isArray(registry.archived)?registry.archived:[]);
+    const source=registry.customCards.filter(item=>item?.id&&!archived.has(`custom:${item.id}`)&&item.url).map(item=>({id:`registry-user-${item.id}`,displayName:item.title||'追加カード',description:item.summary||'システム資産台帳から同期',category:registryPurposeCategory(item.purpose),productionUrl:item.url,parentSystem:'STEPシステム資産台帳',keywords:[item.audience,item.purpose].filter(Boolean),isNew:true,favorite:true,recent:true,status:'active'}));
+    return Core.buildApps(source,{allowDuplicateUrls:true});
   }
   function sharedPayload(){return Object.assign({},clone(state.sharedEnvelope||{}),{schemaVersion:1,workspaceConfig:clone(state.config),favorites:[...state.favorites]})}
   function setSyncStatus(message,status){const root=byId('syncStatus');if(!root)return;root.textContent=message;root.dataset.status=status||''}
   function applySharedPayload(payload,version){
     if(!payload?.workspaceConfig)return false;
-    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
+    state.sharedApplying=true;state.sharedEnvelope=clone(payload||{});state.registrySharedApps=registryAppsFromShared(payload);state.config=Core.normalizeWorkspaceConfig(payload.workspaceConfig);writeJson(WORKSPACE_CONFIG_KEY,state.config);rebuildApps();
     if(Array.isArray(payload.favorites)){state.favorites=payload.favorites.filter(id=>state.allApps.some(app=>app.id===id));writeJson(FAVORITES_KEY,state.favorites)}
     state.sharedVersion=Math.max(0,Number(version||0));state.sharedReady=true;state.sharedApplying=false;renderAll();setSyncStatus('全パソコンで共有中','ready');return true;
   }
@@ -157,7 +174,7 @@
       card.addEventListener('dragleave',event=>{if(!card.contains(event.relatedTarget))card.classList.remove('is-drop-before','is-drop-after')});
       card.addEventListener('drop',event=>{event.preventDefault();event.stopPropagation();const dragged=event.dataTransfer.getData('application/x-step-app')||event.dataTransfer.getData('text/plain');const after=card.classList.contains('is-drop-after');card.classList.remove('is-drop-before','is-drop-after');moveAppRelative(dragged,app.id,after)});
     }
-    renderAppIcon(card.querySelector('.app-icons'),app);card.querySelector('.app-copy strong').textContent=app.name;const description=card.querySelector('.app-copy small');description.textContent=app.description;description.title=app.description;card.querySelector('.app-category-tag').textContent=app.categoryLabel;
+    renderAppIcon(card.querySelector('.app-icons'),app);const newBadge=card.querySelector('.new-badge');newBadge.hidden=!app.isNew;card.querySelector('.app-copy strong').textContent=app.name;const description=card.querySelector('.app-copy small');description.textContent=app.description;description.title=app.description;card.querySelector('.app-category-tag').textContent=app.categoryLabel;
     const link=card.querySelector('.app-link');
     if(app.url){link.href=app.url;link.target='_blank';link.rel='noopener noreferrer';if(app.recentEnabled)link.addEventListener('click',()=>recordRecent(app.id))}
     else{card.classList.add('is-unavailable');link.removeAttribute('href');link.setAttribute('aria-disabled','true');card.querySelector('.open-label').textContent='本番URL確認中'}
