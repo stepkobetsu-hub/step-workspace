@@ -52,7 +52,7 @@
     </aside>
     <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="メニューを閉じる"></button>
     <div class="portal-main">
-      <header class="site-header"><button class="mobile-menu" id="mobileMenuButton" type="button" aria-label="メニューを開く">☰</button><div class="page-title"><h1>STEP 業務ホーム</h1><p>必要なアプリへ、ここからすぐアクセスできます。</p></div><div class="header-tools"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg><label class="sr-only" for="searchInput">アプリ名・用途から検索</label><input id="searchInput" type="search" placeholder="アプリ名・用途から検索" autocomplete="off"><kbd aria-hidden="true">/</kbd></div><section class="search-popover" id="searchSection" hidden><div class="search-result-head"><strong>検索結果</strong><span id="searchCount"></span></div><div id="searchGrid"></div><div class="empty-state" id="searchEmpty" hidden><strong>該当するアプリがありません</strong></div></section></div><button class="header-settings" id="headerSettingsButton" type="button" aria-label="管理・設定">⚙</button><button class="header-logout" id="logoutButton" type="button">ログアウト</button></div></header>
+      <header class="site-header"><button class="mobile-menu" id="mobileMenuButton" type="button" aria-label="メニューを開く">☰</button><div class="page-title"><h1>STEP 業務ホーム</h1><p>必要なアプリへ、ここからすぐアクセスできます。</p></div><div class="header-tools"><div class="search-area"><div class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.4A7.75 7.75 0 1 1 3.5 11.25a7.75 7.75 0 0 1 15.5 0Z"/></svg><label class="sr-only" for="searchInput">アプリ名・用途から検索</label><input id="searchInput" type="search" placeholder="アプリ名・用途から検索" autocomplete="off"><kbd aria-hidden="true">/</kbd></div><section class="search-popover" id="searchSection" hidden><div class="search-result-head"><strong>検索結果</strong><span id="searchCount"></span></div><div id="searchGrid"></div><div class="empty-state" id="searchEmpty" hidden><strong>該当するアプリがありません</strong></div></section></div><button class="header-usage" id="usageButton" type="button">使い方</button><button class="header-settings" id="headerSettingsButton" type="button" aria-label="管理・設定">⚙</button><button class="header-logout" id="logoutButton" type="button">ログアウト</button></div></header>
       <main class="content" id="mainContent"><span id="userName" hidden></span><span id="appCount" hidden></span><div id="home"></div>
         <div id="defaultSections"><section id="favoriteSection"><div class="section-heading"><h2>よく使うアプリ</h2></div><div class="app-grid featured-grid" id="favoriteGrid"></div></section><section id="recentSection" hidden><div class="section-heading"><h2>最近使ったアプリ</h2></div><div class="app-grid compact-grid" id="recentGrid"></div></section><section class="all-apps-section"><div class="section-heading"><h2>用途から探す</h2></div><p class="organize-help" id="organizeHelp" hidden>左の項目はドラッグで上下に移動できます。カードは好きな位置や、左の移動先項目へドラッグしてください。</p><div id="categorySections"></div></section></div>
       </main>
@@ -88,6 +88,10 @@
     </form>
   </dialog>
 
+  <dialog class="settings-dialog usage-dialog" id="usageDialog">
+    <form method="dialog" class="settings-panel usage-panel"><div class="settings-heading"><div><h2>カード情報の変更方法</h2></div><button type="submit" aria-label="閉じる">×</button></div><p>カードの基本情報は「STEPシステム資産管理台帳」を正本として、STEP業務ホームへ自動反映します。</p><table class="usage-table"><tbody><tr><th>使う人・何のアプリか</th><td>STEPシステム資産管理台帳で変更</td></tr><tr><th>カード名・説明・URL</th><td>STEPシステム資産管理台帳で変更</td></tr><tr><th>カードの追加・削除・非表示</th><td>STEPシステム資産管理台帳で変更</td></tr><tr><th>並び順・お気に入り・PC／スマホ設定</th><td>STEP業務ホームで変更</td></tr></tbody></table><p class="usage-note">資産台帳にあるカードは、資産台帳の内容が優先されます。業務ホームだけに追加したカードは、資産台帳へ自動登録されません。</p><div class="settings-footer"><span></span><button class="primary-button dialog-close" type="submit">わかりました</button></div></form>
+  </dialog>
+
   <dialog class="settings-dialog" id="addCardDialog">
     <form class="settings-panel card-form" id="addCardForm">
       <div class="settings-heading"><div><h2 id="cardDialogTitle">カードを追加</h2></div><button id="closeAddCardButton" type="button" aria-label="閉じる">×</button></div>
@@ -112,7 +116,7 @@
     </form>
   </dialog>
 
-  <script src="core.js?v=20260914-registry-master-1"></script>
-  <script src="app.v20260818-32.js?v=20260914-registry-master-1"></script>
+  <script src="core.js?v=20260914-registry-master-2"></script>
+  <script src="app.v20260818-32.js?v=20260914-registry-master-2"></script>
 </body>
 </html>
