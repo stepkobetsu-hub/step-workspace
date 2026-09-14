@@ -4,8 +4,8 @@ const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
-const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');
+const app=fs.readFileSync(path.join(root,'app.v20260818-32.js'),'utf8');
+const css=fs.readFileSync(path.join(root,'styles.v20260813-25.css'),'utf8');
 
 test('all card links open in a safe new tab',()=>{assert.match(app,/link\.target='_blank'/);assert.match(app,/link\.rel='noopener noreferrer'/)});
 test('categories can be added and deleted through saved history',()=>{assert.match(app,/delete-category-button/);assert.match(app,/deleteCategory\(/);assert.match(app,/removedCategories/);assert.match(app,/commitConfig\(config=>/)});
@@ -21,6 +21,7 @@ test('保存済みアプリを即時表示し通信障害ではログイン画�
 test('台帳更新と台帳画面の追加カードを自動同期する',()=>{assert.match(app,/\?updated=\$\{Date\.now\(\)\}/);assert.match(app,/cache:'no-cache'/);assert.match(app,/registryConfig/);assert.match(app,/registryAppsFromShared/);assert.match(app,/registrySharedApps/)});
 test('台帳と共通の6分類とNEW表示を使う',()=>{for(const label of ['請求・経理','講師','生徒・成績','受付・事務','広告宣伝','その他'])assert.match(fs.readFileSync(path.join(root,'core.js'),'utf8'),new RegExp(label));assert.match(html,/class="new-badge" hidden>NEW/);assert.match(app,/newBadge\.hidden=!app\.isNew/);assert.match(app,/applyRegistryPurposeAssignments/);assert.match(app,/purposeTypes/);assert.match(css,/\.new-badge/)});
 test('古い手動分類より台帳と共通の自動分類を優先する',()=>{assert.match(app,/automaticPurposeCategory/);assert.match(app,/配信システム/);assert.match(app,/registryPurposeOverrides/);assert.match(app,/state\.config\.assignments\[app\.id\]=/)});
+test('台帳で変更したカード名・説明・URL・利用者を業務ホームへ反映する',()=>{assert.match(app,/registryCardOverridesFromShared/);assert.match(app,/applyRegistryCardDetails/);assert.match(app,/automaticAudiences/);assert.match(html,/class="app-audiences"/);assert.match(css,/\.app-audiences/)});
 test('ログイン成功後は台帳通信を待たず内蔵カタログでホームを表示する',()=>{assert.match(app,/if\(!loadRegistryCache\(\)&&!await loadBundledCatalog\(\)\)/);assert.match(app,/refreshInBackground\(\);return true/);assert.doesNotMatch(app,/return loadRegistry\(\)/)});
 test('静的カタログ取得はブラウザキャッシュを利用する',()=>{assert.doesNotMatch(app,/cache:'no-store'/);assert.doesNotMatch(app,/cache:"no-store"/)});
 test('workspace layout and favorites sync through the authenticated backend',()=>{for(const value of ['getWorkspaceConfig','saveWorkspaceConfig','publishConfigButton','sharedPayload','scheduleSharedSave'])assert.match(app,new RegExp(value));assert.match(app,/workspaceConfig:clone\(state\.config\)/);assert.match(app,/favorites:\[\.\.\.state\.favorites\]/);assert.match(html,/この配置を全端末へ反映/)});
@@ -28,7 +29,7 @@ test('スタッフ共通認証と台帳・機能カタログを再利用する',
 test('アプリカードは通常のリンクを使う',()=>{assert.match(html,/<a class="app-link">/);assert.match(app,/link\.href=app\.url/);assert.doesNotMatch(app,/window\.location/)});
 test('Googleスプレッドシートのカードは専用SVGアイコンを表示する',()=>{assert.match(app,/sheet-app-icon/);assert.match(app,/Google スプレッドシート/);assert.match(app,/sheet-grid/)});
 test('Sheetsカードは専用のSheetsマークを表示する',()=>{assert.match(html,/class="app-icons"/);assert.match(html,/class="sheet-app-icon"/);assert.match(app,/sheet\.hidden=app\.iconType!==\'google-sheet\'/)});
-test('Google Sheets mark is positioned at the card bottom right',()=>{const css=fs.readFileSync(path.join(root,'styles.css'),'utf8');assert.match(css,/\.app-card \.sheet-app-icon\{position:absolute;right:42px;bottom:10px/);assert.match(css,/pointer-events:none/)});
+test('Google Sheets mark is positioned at the card bottom right',()=>{assert.match(css,/\.app-card \.sheet-app-icon\{position:absolute;right:42px;bottom:10px/);assert.match(css,/pointer-events:none/)});
 test('business portal visual hierarchy keeps favorites first and categories compact',()=>{assert.match(html,/class="portal-sidebar"/);assert.match(html,/必要なアプリへ、ここからすぐアクセスできます。/);assert.ok(html.indexOf('id="favoriteSection"')<html.indexOf('class="all-apps-section"'));assert.match(app,/categoryDescription\(/);assert.match(css,/featured-grid\{grid-template-columns:repeat\(5/)});
 test('management controls stay inside a dedicated mode',()=>{assert.match(html,/id="managementButton"/);assert.match(html,/id="managementPanel" hidden/);assert.match(html,/id="finishManagementButton"/);assert.match(app,/setManagementMode\(/);assert.match(css,/app-shell:not\(\.is-admin-mode\)/)});
 test('search remains a popover over the home screen',()=>{assert.match(html,/class="search-popover"/);assert.match(html,/アプリ名・用途から検索/);assert.doesNotMatch(app,/defaultSections'\)\.hidden=active/);assert.match(app,/slice\(0,8\)/)});
